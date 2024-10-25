@@ -106,6 +106,8 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
                     'comp_id': comp_id,
                     'log_session': log_session,
                     'user_name': user_name,
+                    'version': version,
+                    'hostname': hostname
                 }
                 # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
                 # Internally, we do this with a keyfile and db
