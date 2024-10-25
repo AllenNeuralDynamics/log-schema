@@ -127,13 +127,6 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         return record
 
     logging.setLogRecordFactory(record_factory)
-
-    """ 
-    Uses dictionary to configure the logging module. Dictionary pulls info config from:
-            1. defaults: defined above (caches locally after running once) OR pulled from local config file
-            2. logging_v2" from a custom project [Optional]
-    """
-
     logging.config.dictConfig(log_config)
 
     if send_start_log:
