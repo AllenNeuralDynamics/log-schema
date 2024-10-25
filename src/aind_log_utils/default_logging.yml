@@ -1,0 +1,54 @@
+# introduced with MPETK....
+
+disable_existing_loggers: true
+formatters:
+  detailed:
+    datefmt: '%m/%d/%Y %I:%M:%S %p'
+    format: '%(asctime)s, %(levelname)s, %(module)s::%(lineno)s, %(message)s'
+  log_server:
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    format: '%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s'
+  simple:
+    datefmt: '%m/%d/%Y %I:%M:%S %p'
+    format: '%(asctime)s, %(message)s'
+handlers:
+  console_handler:
+    class: logging.StreamHandler
+    formatter: simple
+    level: INFO
+    stream: ext://sys.stdout
+
+  default_file_handler:
+    backupCount: 20
+    class: logging.handlers.RotatingFileHandler
+    encoding: utf8
+    filename: "c:/programdata/AIND/{proj_name}/{proj_name}.log"
+    formatter: simple
+    level: INFO
+    maxBytes: 10485760
+
+  loki_handler:
+    class: logging_loki.LokiHandler
+    formatter: log_server
+    level: INFO
+    url: https://logs-prod-021.grafana.net/loki/api/v1/push
+    tags:
+      application: ''
+      comp_id: ''
+      log_session: ''
+      user_id: ''
+    version: '1'
+    auth:
+      - ''
+      - ''
+loggers:
+  aind_logger:
+    handlers:
+    - console_handler
+    - default_file_handler
+    - loki_handler
+    level: INFO
+    propagate: False
+
+
+version: 1
