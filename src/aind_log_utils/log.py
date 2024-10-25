@@ -123,12 +123,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         record.project = project_name
         record.log_session = log_session
         record.user_name = user_name
-        # we need to add these as tags to loki
 
-        if type(record.msg) is str:
-            record.msg = record.msg if record.msg and record.msg[-1] == ',' else record.msg + ','
-        if isinstance(record.msg, dict):
-            record.msg = ", ".join([str(item) for keyval in record.msg.items() for item in keyval])
         return record
 
     logging.setLogRecordFactory(record_factory)
