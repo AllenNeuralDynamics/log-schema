@@ -2,6 +2,7 @@ import atexit
 import datetime
 import getpass
 import importlib.metadata
+import inspect
 import logging
 import logging.config
 import logging.handlers
@@ -13,7 +14,6 @@ import traceback
 from hashlib import md5
 from importlib import resources
 from queue import Queue
-import inspect
 
 import yaml
 
@@ -68,7 +68,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
 
     frame = inspect.currentframe().f_back
     module = inspect.getmodule(frame)
-    calling_package =  module.__package__
+    calling_package = module.__package__
 
     log_config = load_logging_config(project_name)
 
@@ -98,7 +98,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
     try:
         version = importlib.metadata.version(calling_package)
     except:
-        version = 'N/A' # Probably a 1 off script that's not installed so it likely won't have a version
+        version = 'N/A'  # Probably a 1 off script that's not installed so it likely won't have a version
 
     user_name = getpass.getuser()
 
@@ -136,6 +136,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         atexit.register(lambda: logging.info("Stopping"))
 
     return logging.getLogger('aind_logger')
+
 
 def get_queue_handler(name: str = "", queue: Queue = None, max_size: int = 1000, log_level: int = logging.INFO,
                       logger: logging.Logger = None) -> logging.handlers.QueueHandler:
