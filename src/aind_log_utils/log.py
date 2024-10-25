@@ -66,10 +66,6 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
     :param always_pass_exc_info: whether to always check for exc_info
     """
 
-    frame = inspect.currentframe().f_back
-    module = inspect.getmodule(frame)
-    calling_package = module.__package__
-
     log_config = load_logging_config(project_name)
 
     # Find file handlers and ensure the path exists to write the log file
@@ -96,7 +92,9 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
 
     # We could consider better how to obtain the version of the calling package
     try:
-        version = importlib.metadata.version(calling_package)
+        frame = inspect.currentframe().f_back
+        module = inspect.getmodule(frame)
+        version = importlib.metadata.version( module.__package__)
     except:
         version = 'N/A'  # Probably a 1 off script that's not installed so it likely won't have a version
 
