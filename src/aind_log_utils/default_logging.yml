@@ -22,7 +22,7 @@ handlers:
     backupCount: 20
     class: logging.handlers.RotatingFileHandler
     encoding: utf8
-    filename: "c:/programdata/AIND/{proj_name}/{proj_name}.log"
+    filename: c:/programdata/AIND/{project_name}/{project_name}.log
     formatter: simple
     level: INFO
     maxBytes: 10485760
@@ -33,10 +33,10 @@ handlers:
     level: INFO
     url: https://logs-prod-021.grafana.net/loki/api/v1/push
     tags:
-      application: ''
+      project_name: ''
       comp_id: ''
       log_session: ''
-      user_id: ''
+      user_name: ''
     version: '1'
     auth:
       - ''

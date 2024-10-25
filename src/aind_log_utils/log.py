@@ -68,25 +68,11 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
 
     log_config = load_logging_config(project_name)
 
-    # Find file handlers and ensure the path exists to write the log file
-    # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
-    handlers = log_config["handlers"]
-    if "default_file_handler" in handlers:
-        handlers["default_file_handler"]["filename"] = handlers["default_file_handler"]["filename"].format(
-            proj_name=project_name)
-
-    for handler in handlers:
-        # Configure all file handlers
-        if "FileHandler" in handlers[handler]["class"] and "filename" in handlers[handler]:
-            os.makedirs(os.path.dirname(handlers[handler]["filename"]), exist_ok=True)
-
-    # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
-    # Internally, we do this with a keyfile and db
+    # We need the following for the record factory and for massaging the handler parameters
 
     # Identifies all logs as existing between the launch and tear down of the application
     session_parts = [str(datetime.datetime.now()), platform.node(), str(os.getpid())]
     log_session = md5((''.join(session_parts)).encode("utf-8")).hexdigest()[:7]
-
     hostname = platform.uname().node
     comp_id = os.getenv("aibs_comp_id", "undefined")
 
@@ -94,11 +80,35 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
     try:
         frame = inspect.currentframe().f_back
         module = inspect.getmodule(frame)
-        version = importlib.metadata.version( module.__package__)
+        version = importlib.metadata.version(module.__package__)
     except:
         version = 'N/A'  # Probably a 1 off script that's not installed so it likely won't have a version
 
     user_name = getpass.getuser()
+
+    # Find file handlers and ensure the path exists to write the log file
+    # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
+    handlers = log_config["handlers"]
+    if "default_file_handler" in handlers:
+        handlers["default_file_handler"]["filename"] = handlers["default_file_handler"]["filename"].format(
+            project_name=project_name)
+
+    for handler in handlers.values():
+        # Configure all file handlers
+        match handler['class']:
+            case "FileHandler":
+                if "filename" in handler:
+                    os.makedirs(os.path.dirname(handler["filename"]), exist_ok=True)
+
+            case "logging_loki.LokiHandler":
+                handler['tags'] = {
+                    'project_name': project_name,
+                    'comp_id': comp_id,
+                    'log_session': log_session,
+                    'user_name': user_name,
+                }
+                # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
+                # Internally, we do this with a keyfile and db
 
     def record_factory(*args, **kwargs):
         record = log_record_factory(*args, **kwargs)
