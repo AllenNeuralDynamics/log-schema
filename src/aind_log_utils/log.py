@@ -10,12 +10,27 @@ from os import PathLike
 from queue import Queue
 
 import yaml
+import json
 
 from .settings import Settings
 
 log_record_factory = (
     logging.getLogRecordFactory()
 )  # Needs to be in the global scope
+
+
+class JsonFormatter(logging.Formatter):
+    """Formatter to dump error message into JSON"""
+
+    def format(self, record: logging.LogRecord) -> str:
+        record_dict = {
+            "level": record.levelname,
+            "date": self.formatTime(record),
+            "message": record.getMessage(),
+            "module": record.module,
+            "lineno": record.lineno,
+        }
+        return json.dumps(record_dict)
 
 
 def load_logging_config(filename: PathLike) -> dict:
@@ -31,13 +46,14 @@ def load_logging_config(filename: PathLike) -> dict:
         else:
             print(f"Default logging configuration to {filename}")
     else:
-        log_config = yaml.safe_load(open(filename, "r"))
+        # log_config = yaml.safe_load(open(filename, "r"))
+        log_config = yaml.load(open(filename, "r"), Loader=yaml.FullLoader)
 
     return log_config
 
 
 def setup_logging(
-    project_name: str, send_start_log: bool = True, always_pass_exc_info=False
+    project_name: str, send_start_log: bool = True, always_pass_exc_info=False, logger_name='aind_logger',
 ):
     """
     Logging setup consists of
