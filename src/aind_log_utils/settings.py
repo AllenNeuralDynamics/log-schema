@@ -21,12 +21,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="aind_log_utils"
+        env_prefix="aind_log_utils_"
     )  # , extra='allow')
 
     project_name: str = Field("undefined")
     comp_id: str = Field(
-        "N/A", validation_alias=AliasChoices("aibs_comp_id", "aind_comp_id")
+        "N/A",
+        validation_alias=AliasChoices("aibs_comp_id", "aind_comp_id"),
     )
     dev_mode: bool = Field(False)
     hostname: str = platform.uname().node
@@ -38,7 +39,7 @@ class Settings(BaseSettings):
         return self.project_path / "logs" / f"{self.project_name}.yml"
 
     @computed_field
-    @property
+    @cached_property
     def version(self) -> str:
         try:
             frame = sys._getframe(2)
