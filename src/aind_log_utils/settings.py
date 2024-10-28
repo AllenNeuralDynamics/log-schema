@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def log_config_file(self) -> os.PathLike:
-        return self.core.project_path / 'logs' / f'{self.project_name}.yml'
+        return self.project_path / 'logs' / f'{self.project_name}.yml'
 
     @computed_field
     @property
