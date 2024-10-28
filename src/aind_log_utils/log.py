@@ -11,7 +11,7 @@ from queue import Queue
 
 import yaml
 
-from settings import Settings
+from .settings import Settings
 
 log_record_factory = logging.getLogRecordFactory()  # Needs to be in the global scope
 
@@ -59,7 +59,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
     for handler in handlers.values():
         # Configure all file handlers
         match handler['class']:
-            case "FileHandler":
+            case "logging.handlers.RotatingFileHandler":
                 if "filename" in handler:
                     os.makedirs(os.path.dirname(handler["filename"]), exist_ok=True)
 
@@ -67,7 +67,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
                 handler['tags'] = {
                     'project_name': project_name,
                     'comp_id': config.comp_id,
-                    'log_session': config.log_session,
+                    'log_session': config.session_id,
                     'user_name': config.user_name,
                     'version': config.version,
                     'hostname': config.hostname
@@ -84,7 +84,7 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         record.comp_id = config.comp_id
         record.version = config.version
         record.project = config.project_name
-        record.log_session = config.log_session
+        record.log_session = config.session_id
         record.user_name = config.user_name
 
         return record
