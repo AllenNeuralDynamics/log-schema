@@ -12,7 +12,7 @@ from queue import Queue
 import yaml
 import json
 
-from .settings import Settings
+from aind_log_utils.settings import Settings
 
 log_record_factory = (
     logging.getLogRecordFactory()
@@ -66,7 +66,7 @@ def setup_logging(
     """
 
     config = Settings(project_name=project_name)
-    logging.raiseExceptions = Settings().dev_mode
+    logging.raiseExceptions = config.dev_mode
     log_config = load_logging_config(config.log_config_file)
 
     # Find file handlers and ensure the path exists to write the log file
