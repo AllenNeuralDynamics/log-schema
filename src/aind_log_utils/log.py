@@ -13,28 +13,32 @@ import yaml
 
 from .settings import Settings
 
-log_record_factory = logging.getLogRecordFactory()  # Needs to be in the global scope
-
-
+log_record_factory = (
+    logging.getLogRecordFactory()
+)  # Needs to be in the global scope
 
 
 def load_logging_config(filename: PathLike) -> dict:
     if not os.path.exists(filename):
-        log_config = yaml.safe_load(resources.read_text("aind_log_utils", "default_logging.yml"))
+        log_config = yaml.safe_load(
+            resources.read_text("aind_log_utils", "default_logging.yml")
+        )
         try:
             os.makedirs(os.path.dirname(filename), exist_ok=True)
-            yaml.dump(log_config, open(filename, 'w'))
+            yaml.dump(log_config, open(filename, "w"))
         except IOError as e:
             print(f"Could not write logging configuration to {filename}: {e}")
         else:
             print(f"Default logging configuration to {filename}")
     else:
-        log_config = yaml.safe_load(open(filename, 'r'))
+        log_config = yaml.safe_load(open(filename, "r"))
 
     return log_config
 
 
-def setup_logging(project_name: str, send_start_log: bool = True, always_pass_exc_info=False):
+def setup_logging(
+    project_name: str, send_start_log: bool = True, always_pass_exc_info=False
+):
     """
     Logging setup consists of
       1.  applying the logging configuration to the Python logging module
@@ -53,24 +57,27 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
     # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
     handlers = log_config["handlers"]
     if "default_file_handler" in handlers:
-        handlers["default_file_handler"]["filename"] = handlers["default_file_handler"]["filename"].format(
-            project_name=project_name)
+        handlers["default_file_handler"]["filename"] = handlers[
+            "default_file_handler"
+        ]["filename"].format(project_name=project_name)
 
     for handler in handlers.values():
         # Configure all file handlers
-        match handler['class']:
+        match handler["class"]:
             case "logging.handlers.RotatingFileHandler":
                 if "filename" in handler:
-                    os.makedirs(os.path.dirname(handler["filename"]), exist_ok=True)
+                    os.makedirs(
+                        os.path.dirname(handler["filename"]), exist_ok=True
+                    )
 
             case "logging_loki.LokiHandler":
-                handler['tags'] = {
-                    'project_name': project_name,
-                    'comp_id': config.comp_id,
-                    'log_session': config.session_id,
-                    'user_name': config.user_name,
-                    'version': config.version,
-                    'hostname': config.hostname
+                handler["tags"] = {
+                    "project_name": project_name,
+                    "comp_id": config.comp_id,
+                    "log_session": config.session_id,
+                    "user_name": config.user_name,
+                    "version": config.version,
+                    "hostname": config.hostname,
                 }
                 # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
                 # Internally, we do this with a keyfile and db
@@ -96,25 +103,30 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         logging.info("Starting")
         atexit.register(lambda: logging.info("Stopping"))
 
-    return logging.getLogger('aind_logger')
+    return logging.getLogger("aind_logger")
 
 
-def get_queue_handler(name: str = "", queue: Queue = None, max_size: int = 1000, log_level: int = logging.INFO,
-                      logger: logging.Logger = None) -> logging.handlers.QueueHandler:
+def get_queue_handler(
+    name: str = "",
+    queue: Queue = None,
+    max_size: int = 1000,
+    log_level: int = logging.INFO,
+    logger: logging.Logger = None,
+) -> logging.handlers.QueueHandler:
     """
-       QueueHandlers are a place to aggregate logs for review internally in your app.  For example, a status bar might
-       want to create a queue, so it can view logs and add their text to the status bar without messing up location
-       information.
+    QueueHandlers are a place to aggregate logs for review internally in your app.  For example, a status bar might
+    want to create a queue, so it can view logs and add their text to the status bar without messing up location
+    information.
 
-       You can create arbitrarily named queues and reference them later in your application.  If a handler with name
-       already exists, that will be returned to you.
+    You can create arbitrarily named queues and reference them later in your application.  If a handler with name
+    already exists, that will be returned to you.
 
-        :param name: [default] The name of the handler.  The default is "default"
-        :param max_size: [1000] The number of logs the queue can contain.  If full, insertion of logs will block.
-        :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
-        :param logger: [root] A logger on which to attach the handler.
-        :param queue: [None] A queue object to pass to a new QueueHandler.  One will be created if queue=None
-        :returns handler:  The QueueHandler you requested
+     :param name: [default] The name of the handler.  The default is "default"
+     :param max_size: [1000] The number of logs the queue can contain.  If full, insertion of logs will block.
+     :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
+     :param logger: [root] A logger on which to attach the handler.
+     :param queue: [None] A queue object to pass to a new QueueHandler.  One will be created if queue=None
+     :returns handler:  The QueueHandler you requested
     """
 
     name = name or "default"
