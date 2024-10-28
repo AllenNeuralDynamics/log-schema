@@ -10,11 +10,25 @@
 
 
 ## Usage
- - To use this template, click the green `Use this template` button and `Create new repository`.
- - After github initially creates the new repository, please wait an extra minute for the initialization scripts to finish organizing the repo.
- - To enable the automatic semantic version increments: in the repository go to `Settings` and `Collaborators and teams`. Click the green `Add people` button. Add `svc-aindscicomp` as an admin. Modify the file in `.github/workflows/tag_and_publish.yml` and remove the if statement in line 65. The semantic version will now be incremented every time a code is committed into the main branch.
- - To publish to PyPI, enable semantic versioning and uncomment the publish block in `.github/workflows/tag_and_publish.yml`. The code will now be published to PyPI every time the code is committed into the main branch.
- - The `.github/workflows/test_and_lint.yml` file will run automated tests and style checks every time a Pull Request is opened. If the checks are undesired, the `test_and_lint.yml` can be deleted. The strictness of the code coverage level, etc., can be modified by altering the configurations in the `pyproject.toml` file and the `.flake8` file.
+Typical programmatic usage of this library looks like this:
+```python
+import logging
+from aind_log_utils import setup_logging
+
+logger = setup_logging("my_project_name")
+logging.info("my log message")
+
+# Tags represent query terms in Grafana
+logging.info("another log", extra={'tags': {'mouse_id': 900002}})
+```
+
+When you first run this code, it will create a logging configuration file for you in `c:\ProgramData\AIND\my_project_name`
+For now, until it is decided how to handle secrets management, you will need to edit this file and add the LOKI credentials.
+
+Several settings can be overridden as environment variables with a prefix of `aind_log_utils_`.  Most notably:
+- `aind_log_utils_dev_mode`:  default: `False`.  displays errors during logging configuration
+- `aind_log_utils_log_config_file`: default: `c:\ProgramData\AIND\my_project_name\logs\my_project_name.yml` which is 
+useful for experimenting with other logging configuration.
 
 ## Installation
 To use the software, in the root directory, run
