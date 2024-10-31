@@ -54,6 +54,7 @@ def load_logging_config(filename: PathLike) -> dict:
 
 def setup_logging(
     project_name: str, send_start_log: bool = True, always_pass_exc_info=False, logger_name='aind_logger',
+    codeocean: bool = False,
 ):
     """
     Logging setup consists of
@@ -67,7 +68,12 @@ def setup_logging(
 
     config = Settings(project_name=project_name)
     logging.raiseExceptions = config.dev_mode
-    log_config = load_logging_config(config.log_config_file)
+    if codeocean:
+        log_config = yaml.safe_load(
+            resources.read_text("aind_log_utils", "default_logging.yml")
+        )
+    else:
+        log_config = load_logging_config(config.log_config_file)
 
     # Find file handlers and ensure the path exists to write the log file
     # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
