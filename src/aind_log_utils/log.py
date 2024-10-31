@@ -83,6 +83,12 @@ def setup_logging(
             "default_file_handler"
         ]["filename"].format(project_name=project_name)
 
+    if "loki_handler" in handlers and codeocean:
+        handlers["auth"] = (
+            os.environ.get("GRAFANA_USER"),
+            os.environ.get("GRAFANA_PASS"),
+        )
+
     for handler in handlers.values():
         # Configure all file handlers
         match handler["class"]:
