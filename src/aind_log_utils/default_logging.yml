@@ -18,14 +18,14 @@ handlers:
     level: INFO
     stream: ext://sys.stdout
 
-  default_file_handler:
-    backupCount: 20
-    class: logging.handlers.RotatingFileHandler
-    encoding: utf8
-    filename: c:/programdata/AIND/{project_name}/{project_name}.log
-    formatter: simple
-    level: INFO
-    maxBytes: 10485760
+  # default_file_handler:
+  #   backupCount: 20
+  #   class: logging.handlers.RotatingFileHandler
+  #   encoding: utf8
+  #   filename: c:/programdata/AIND/{project_name}/{project_name}.log
+  #   formatter: simple
+  #   level: INFO
+  #   maxBytes: 10485760
 
   loki_handler:
     class: logging_loki.LokiHandler
@@ -45,7 +45,7 @@ loggers:
   aind_logger:
     handlers:
     - console_handler
-    - default_file_handler
+    # - default_file_handler
     - loki_handler
     level: INFO
     propagate: False
