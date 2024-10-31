@@ -79,24 +79,22 @@ def setup_logging(
 
     for handler in handlers.values():
         # Configure all file handlers
-        match handler["class"]:
-            case "logging.handlers.RotatingFileHandler":
-                if "filename" in handler:
-                    os.makedirs(
-                        os.path.dirname(handler["filename"]), exist_ok=True
-                    )
-
-            case "logging_loki.LokiHandler":
-                handler["tags"] = {
-                    "project_name": project_name,
-                    "comp_id": config.comp_id,
-                    "log_session": config.session_id,
-                    "user_name": config.user_name,
-                    "version": config.version,
-                    "hostname": config.hostname,
-                }
-                # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
-                # Internally, we do this with a keyfile and db
+        if handler["class"] == "logging.handlers.RotatingFileHandler":
+            if "filename" in handler:
+                os.makedirs(
+                    os.path.dirname(handler["filename"]), exist_ok=True
+                )
+        elif handler["class"] == "logging_loki.LokiHandler":
+            handler["tags"] = {
+                "project_name": project_name,
+                "comp_id": config.comp_id,
+                "log_session": config.session_id,
+                "user_name": config.user_name,
+                "version": config.version,
+                "hostname": config.hostname,
+            }
+            # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
+            # Internally, we do this with a keyfile and db
 
     def record_factory(*args, **kwargs):
         record = log_record_factory(*args, **kwargs)

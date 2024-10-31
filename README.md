@@ -54,7 +54,7 @@ coverage run -m unittest discover && coverage report
 ```
 
 - Use **interrogate** to check that modules, methods, etc. have been documented thoroughly:
-
+[.flake8](.flake8)
 ```bash
 interrogate .
 ```
