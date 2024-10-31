@@ -78,7 +78,11 @@ def setup_logging(
     # Find file handlers and ensure the path exists to write the log file
     # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
     handlers = log_config["handlers"]
-    if "default_file_handler" in handlers and not codeocean:
+    if codeocean:
+        # TODO: determine way to configure codeocean logging, disseminate from on-prem mode
+        handlers.pop("default_file_handler")
+
+    if "default_file_handler" in handlers:
         handlers["default_file_handler"]["filename"] = handlers[
             "default_file_handler"
         ]["filename"].format(project_name=project_name)
@@ -87,7 +91,7 @@ def setup_logging(
         # Configure all file handlers
         match handler["class"]:
             case "logging.handlers.RotatingFileHandler":
-                if "filename" in handler and not codeocean:
+                if "filename" in handler:
                     os.makedirs(
                         os.path.dirname(handler["filename"]), exist_ok=True
                     )
