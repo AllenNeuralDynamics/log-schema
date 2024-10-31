@@ -44,7 +44,7 @@ handlers:
   watchtower:
     class: watchtower.CloudWatchLogHandler
     level: INFO
-    log_group_name: watchtower
+    log_group_name: ''/aws/batch/job'
     log_stream_name: "{logger_name}-{strftime:%y-%m-%d}"
     send_interval: 10
     create_log_group: False
@@ -54,7 +54,6 @@ loggers:
     handlers:
     - console_handler
     - watchtower
-    - loki_handler
     level: INFO
     propagate: False
 
