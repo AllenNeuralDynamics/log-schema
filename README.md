@@ -41,6 +41,10 @@ To develop the code, run
 pip install -e .[dev]
 ```
 
+## Examples
+```
+```
+
 ## Contributing
 
 ### Linters and testing

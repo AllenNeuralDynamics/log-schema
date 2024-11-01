@@ -11,6 +11,7 @@ from queue import Queue
 
 import yaml
 import json
+import boto3
 
 from aind_log_utils.settings import Settings
 
@@ -95,6 +96,11 @@ def setup_logging(
             }
             # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
             # Internally, we do this with a keyfile and db
+        elif handler["class"] == "watchtower.CloudWatchLogHandler":
+            handler["boto3_client"] = boto3.client(
+                "logs",
+                "us-west-2",
+            )
 
     def record_factory(*args, **kwargs):
         record = log_record_factory(*args, **kwargs)
