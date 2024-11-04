@@ -17,7 +17,6 @@ handlers:
     formatter: simple
     level: INFO
     stream: ext://sys.stdout
-
   default_file_handler:
     backupCount: 20
     class: logging.handlers.RotatingFileHandler
@@ -26,7 +25,7 @@ handlers:
     formatter: simple
     level: INFO
     maxBytes: 10485760
-
+  #  https://github:com/greyzmeem/python-logging-loki
   loki_handler:
     class: logging_loki.LokiHandler
     formatter: log_server
@@ -41,12 +40,20 @@ handlers:
     auth:
       - ''
       - ''
+  #  https://github:com/kislyuk/watchtower
+  watchtower:
+    class: watchtower.CloudWatchLogHandler
+    level: INFO
+    log_group_name: '/aws/batch/job'
+    log_stream_name: "{logger_name}-{strftime:%y-%m-%d}"
+    send_interval: 10
+    create_log_group: False
+
 loggers:
   aind_logger:
     handlers:
     - console_handler
-    - default_file_handler
-    - loki_handler
+    - watchtower
     level: INFO
     propagate: False
 

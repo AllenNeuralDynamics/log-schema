@@ -1,60 +1,60 @@
 import atexit
-import datetime
-import getpass
-import importlib.metadata
-import inspect
 import logging
 import logging.config
 import logging.handlers
 import os
-import pathlib
-import platform
 import sys
 import traceback
-from hashlib import md5
 from importlib import resources
+from os import PathLike
 from queue import Queue
 
 import yaml
+import json
 
-log_record_factory = logging.getLogRecordFactory()
-q = Queue()
-queue_handlers = {}
+from aind_log_utils.settings import Settings
 
-if not os.getenv("AIND_LOG_UTILS_DEV_MODE", False):
-    logging.raiseExceptions = False
-
-
-def project_path(project_name: str) -> pathlib.Path:
-    if path := os.getenv(f'{project_name}_path', None) is None:
-        if 'windows' in platform.uname().system.lower():
-            path = f'c:/ProgramData/AIND/{project_name}'
-        else:
-            path = os.path.expandvars(f'~/.config/AIND/{project_name}')
-    return pathlib.Path(path)
+log_record_factory = (
+    logging.getLogRecordFactory()
+)  # Needs to be in the global scope
 
 
-def load_logging_config(project_name: str) -> dict:
-    log_config_file = project_path(project_name) / f'{project_name}.yml'
-    if filename := os.getenv(f'{project_name}_logfile', None):
-        log_config = yaml.safe_load(open(filename, 'r'))
-    elif os.path.exists(log_config_file):
+class JsonFormatter(logging.Formatter):
+    """Formatter to dump error message into JSON"""
 
-        log_config = yaml.safe_load(open(log_config_file, 'r'))
-    else:
-        log_config = yaml.safe_load(resources.read_text("aind_log_utils", "default_logging.yml"))
+    def format(self, record: logging.LogRecord) -> str:
+        record_dict = {
+            "level": record.levelname,
+            "date": self.formatTime(record),
+            "message": record.getMessage(),
+            "module": record.module,
+            "lineno": record.lineno,
+        }
+        return json.dumps(record_dict)
+
+
+def load_logging_config(filename: PathLike) -> dict:
+    if not os.path.exists(filename):
+        log_config = yaml.safe_load(
+            resources.read_text("aind_log_utils", "default_logging.yml")
+        )
         try:
-            os.makedirs(project_path(project_name), exist_ok=True)
-            yaml.dump(log_config, open(log_config_file, 'w'))
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            yaml.dump(log_config, open(filename, "w"))
         except IOError as e:
-            print(f"Could not write logging configuration to {log_config_file}: {e}")
+            print(f"Could not write logging configuration to {filename}: {e}")
         else:
-            print(f"Default logging configuration to {log_config_file}")
+            print(f"Default logging configuration to {filename}")
+    else:
+        # log_config = yaml.safe_load(open(filename, "r"))
+        log_config = yaml.load(open(filename, "r"), Loader=yaml.FullLoader)
 
     return log_config
 
 
-def setup_logging(project_name: str, send_start_log: bool = True, always_pass_exc_info=False):
+def setup_logging(
+    project_name: str, send_start_log: bool = True, always_pass_exc_info=False, logger_name='aind_logger',
+):
     """
     Logging setup consists of
       1.  applying the logging configuration to the Python logging module
@@ -62,67 +62,51 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
       3.  sending a start log and registering to send a stop log
     :param project_name: The name of the configuration, usually project name, you want to find
     :param send_start_log: Whether to send a log to the webserver (not desirable for libraries) [default = True]
-    :param version: The version of the software to record in the log record
     :param always_pass_exc_info: whether to always check for exc_info
     """
 
-    log_config = load_logging_config(project_name)
-
-    # We need the following for the record factory and for massaging the handler parameters
-
-    # Identifies all logs as existing between the launch and tear down of the application
-    session_parts = [str(datetime.datetime.now()), platform.node(), str(os.getpid())]
-    log_session = md5((''.join(session_parts)).encode("utf-8")).hexdigest()[:7]
-    hostname = platform.uname().node
-    comp_id = os.getenv("aibs_comp_id", "undefined")
-
-    # We could consider better how to obtain the version of the calling package
-    try:
-        frame = inspect.currentframe().f_back
-        module = inspect.getmodule(frame)
-        version = importlib.metadata.version(module.__package__)
-    except:
-        version = 'N/A'  # Probably a 1 off script that's not installed so it likely won't have a version
-
-    user_name = getpass.getuser()
+    config = Settings(project_name=project_name)
+    logging.raiseExceptions = config.dev_mode
+    log_config = load_logging_config(config.log_config_file)
 
     # Find file handlers and ensure the path exists to write the log file
     # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
     handlers = log_config["handlers"]
     if "default_file_handler" in handlers:
-        handlers["default_file_handler"]["filename"] = handlers["default_file_handler"]["filename"].format(
-            project_name=project_name)
+        handlers["default_file_handler"]["filename"] = handlers[
+            "default_file_handler"
+        ]["filename"].format(project_name=project_name)
 
     for handler in handlers.values():
         # Configure all file handlers
-        match handler['class']:
-            case "FileHandler":
-                if "filename" in handler:
-                    os.makedirs(os.path.dirname(handler["filename"]), exist_ok=True)
-
-            case "logging_loki.LokiHandler":
-                handler['tags'] = {
-                    'project_name': project_name,
-                    'comp_id': comp_id,
-                    'log_session': log_session,
-                    'user_name': user_name,
-                    'version': version,
-                    'hostname': hostname
-                }
-                # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
-                # Internally, we do this with a keyfile and db
+        if handler["class"] == "logging.handlers.RotatingFileHandler":
+            if "filename" in handler:
+                os.makedirs(
+                    os.path.dirname(handler["filename"]), exist_ok=True
+                )
+        elif handler["class"] == "logging_loki.LokiHandler":
+            handler["tags"] = {
+                "project_name": project_name,
+                "comp_id": config.comp_id,
+                "log_session": config.session_id,
+                "user_name": config.user_name,
+                "version": config.version,
+                "hostname": config.hostname,
+            }
+            # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
+            # Internally, we do this with a keyfile and db
 
     def record_factory(*args, **kwargs):
         record = log_record_factory(*args, **kwargs)
         if not record.exc_info and always_pass_exc_info:
             record.exc_info = sys.exc_info()
             record.exc_text = traceback.format_exc()
-        record.hostname = hostname
-        record.comp_id = comp_id
-        record.version = version
-        record.project = project_name
-        record.log_session = log_session
-        record.user_name = user_name
+        record.hostname = config.hostname
+        record.comp_id = config.comp_id
+        record.version = config.version
+        record.project = config.project_name
+        record.log_session = config.session_id
+        record.user_name = config.user_name
 
         return record
 
@@ -133,30 +117,35 @@ def setup_logging(project_name: str, send_start_log: bool = True, always_pass_ex
         logging.info("Starting")
         atexit.register(lambda: logging.info("Stopping"))
 
-    return logging.getLogger('aind_logger')
+    return logging.getLogger("aind_logger")
 
 
-def get_queue_handler(name: str = "", queue: Queue = None, max_size: int = 1000, log_level: int = logging.INFO,
-                      logger: logging.Logger = None) -> logging.handlers.QueueHandler:
+def get_queue_handler(
+    name: str = "",
+    queue: Queue = None,
+    max_size: int = 1000,
+    log_level: int = logging.INFO,
+    logger: logging.Logger = None,
+) -> logging.handlers.QueueHandler:
     """
-       QueueHandlers are a place to aggregate logs for review internally in your app.  For example, a status bar might
-       want to create a queue, so it can view logs and add their text to the status bar without messing up location
-       information.
+    QueueHandlers are a place to aggregate logs for review internally in your app.  For example, a status bar might
+    want to create a queue, so it can view logs and add their text to the status bar without messing up location
+    information.
 
-       You can create arbitrarily named queues and reference them later in your application.  If a handler with name
-       already exists, that will be returned to you.
+    You can create arbitrarily named queues and reference them later in your application.  If a handler with name
+    already exists, that will be returned to you.
 
-        :param name: [default] The name of the handler.  The default is "default"
-        :param max_size: [1000] The number of logs the queue can contain.  If full, insertion of logs will block.
-        :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
-        :param logger: [root] A logger on which to attach the handler.
-        :param queue: [None] A queue object to pass to a new QueueHandler.  One will be created if queue=None
-        :returns handler:  The QueueHandler you requested
+     :param name: [default] The name of the handler.  The default is "default"
+     :param max_size: [1000] The number of logs the queue can contain.  If full, insertion of logs will block.
+     :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
+     :param logger: [root] A logger on which to attach the handler.
+     :param queue: [None] A queue object to pass to a new QueueHandler.  One will be created if queue=None
+     :returns handler:  The QueueHandler you requested
     """
 
     name = name or "default"
-    if name in queue_handlers:
-        return queue_handlers[name]
+    if name in get_queue_handler.queue_handlers:
+        return get_queue_handler.queue_handlers[name]
 
     queue = queue or Queue(maxsize=max_size)
     handler = logging.handlers.QueueHandler(queue)
@@ -164,6 +153,10 @@ def get_queue_handler(name: str = "", queue: Queue = None, max_size: int = 1000,
 
     logger = logger or logging.getLogger()
     logger.addHandler(handler)
-    queue_handlers[name] = handler
+    get_queue_handler.queue_handlers[name] = handler
 
     return handler
+
+
+get_queue_handler.q = Queue()
+get_queue_handler.queue_handlers = {}
