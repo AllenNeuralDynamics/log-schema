@@ -53,7 +53,7 @@ loggers:
   aind_logger:
     handlers:
     - console_handler
-    - watchtower
+    # - watchtower
     level: INFO
     propagate: False
 
