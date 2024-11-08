@@ -1,16 +1,16 @@
-import logging
 from aind_log_utils import log
 
+subject_id = "999999"
+session_id = f"{subject_id}-110824"
 
-log.setup_logging(
-    "test_docs_aind-log-utils",  # project_name
+logger = log.setup_logging(
+    "codeocean-test",
+    subject_id=subject_id,
+    session_id=session_id,
 )
 
-logger = logging.getLogger("__name__")
-
-logging.info("This is a test message for watchtower integration.")
-
-logger.debug("This is a test debug message for watchtower integration.")
-logger.info("This is a test info message for watchtower integration.")
-logger.warning("This is a test warning message for watchtower integration.")
-logger.error("This is a test error message for watchtower integration.")
+message_template = "This is a test {} message"
+logger.debug(message_template.format("debug"))
+logger.info(message_template.format("info"))
+logger.warning(message_template.format("warning"))
+logger.error(message_template.format("error"))
