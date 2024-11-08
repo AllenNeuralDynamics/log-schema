@@ -151,16 +151,23 @@ def setup_logging(
     #     "user_name": config.user_name,
     #     **runtime_filters,
     # }
-    # log_config_filters["console_handler"] = {
-    #     "()": runtime_filter_maker,
-    #     "hostname": config.hostname,
-    #     "comp_id": config.comp_id,
-    #     "version": config.version,
-    #     "project": config.project_name,
-    #     "log_session": config.session_id,
-    #     "user_name": config.user_name,
-    #     **runtime_filters,
-    # }
+    log_config_filters["console_handler"] = {
+        "()": runtime_filter_maker,
+        "hostname": config.hostname,
+        "comp_id": config.comp_id,
+        "version": config.version,
+        "project": config.project_name,
+        "log_session": config.session_id,
+        "user_name": config.user_name,
+        **runtime_filters,
+    }
+
+    log_config["formatters"]["simple"]["format"] += ", " + ", ".join(
+        map(
+            lambda name: name + "=%(" + name + ")s",
+            runtime_filters.keys(),
+        )
+    )  # TODO: determine if there is a cleaner way to do this
 
     logging.setLogRecordFactory(record_factory)
     logging.config.dictConfig(log_config)

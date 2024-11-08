@@ -11,7 +11,8 @@ formatters:
   simple:
     datefmt: '%m/%d/%Y %I:%M:%S %p'
     # format: '%(asctime)s, %(message)s, %(project)s, %(subject_id)s, %(session_id)s'
-    format: '%(asctime)s, %(message)s, %(project)s, %(subject_id)s'
+    # format: '%(asctime)s, %(message)s, %(project)s, %(subject_id)s'
+    format: '%(asctime)s, %(message)s'
 handlers:
   console_handler:
     class: logging.StreamHandler
