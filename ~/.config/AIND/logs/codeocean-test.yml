@@ -8,7 +8,7 @@ formatters:
     format: '%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s'
   simple:
     datefmt: '%m/%d/%Y %I:%M:%S %p'
-    format: '%(asctime)s, %(message)s'
+    format: '%(asctime)s, %(message)s, %(project)s, %(subject_id)s, %(session_id)s'
 handlers:
   console_handler:
     class: logging.StreamHandler
@@ -48,7 +48,6 @@ loggers:
   aind_logger:
     handlers:
     - console_handler
-    - watchtower
     level: INFO
     propagate: false
 version: 1
