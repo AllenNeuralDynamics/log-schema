@@ -44,9 +44,10 @@ class Settings(BaseSettings):
         try:
             frame = sys._getframe(2)
             module = inspect.getmodule(frame)
-            version = importlib.metadata.version(module.__package__)
-        except:
-            # Probably a 1 off script that's not installed so it likely won't have a version
+            version = metadata.version(module.__package__)
+        except Exception:
+            # Probably a 1 off
+            # that's not installed so it likely won't have a version
             version = "N/A"
         return version
 
@@ -54,9 +55,9 @@ class Settings(BaseSettings):
     @cached_property
     def project_path(self) -> Union[str, os.PathLike]:
         if "windows" in platform.uname().system.lower():
-            path = f"c:/ProgramData/AIND/"
+            path = "c:/ProgramData/AIND/"
         else:
-            path = os.path.expandvars(f"~/.config/AIND/")
+            path = os.path.expandvars("~/.config/AIND/")
         return pathlib.Path(path)
 
     @computed_field
