@@ -16,7 +16,7 @@ handlers:
     class: logging.StreamHandler
     formatter: simple
     level: INFO
-    stream: ext://sys.stdout
+    stream: sys.stdout
   default_file_handler:
     backupCount: 20
     class: logging.handlers.RotatingFileHandler
@@ -53,9 +53,7 @@ loggers:
   aind_logger:
     handlers:
     - console_handler
-    # - watchtower
     level: INFO
-    propagate: False
-
+    propagate: True
 
 version: 1
