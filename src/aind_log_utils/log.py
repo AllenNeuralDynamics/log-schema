@@ -54,9 +54,9 @@ def load_logging_config(filename: PathLike) -> dict:
 
 
 def setup_logging(
-    project_name: str, 
-    send_start_log: bool = True, 
-    always_pass_exc_info=False, 
+    project_name: str,
+    send_start_log: bool = True,
+    always_pass_exc_info=False,
     logger_name='aind_logger',
     **runtime_filters,
 ):
@@ -77,7 +77,7 @@ def setup_logging(
     log_config = load_logging_config(config.log_config_file)
 
     # Find file handlers and ensure the path exists to write the log file
-    # Also, the default file handler "default_file_handler" 
+    # Also, the default file handler "default_file_handler"
     # is renamed to have the project name in it.
     handlers = log_config["handlers"]
     if "default_file_handler" in handlers:
@@ -101,7 +101,7 @@ def setup_logging(
                 "version": config.version,
                 "hostname": config.hostname,
             }
-            # Here we want to fix up the LOKI log handler via whatever secrets 
+            # Here we want to fix up the LOKI log handler via whatever secrets
             # management technique applies.
             # Internally, we do this with a keyfile and db
         elif handler["class"] == "watchtower.CloudWatchLogHandler":
