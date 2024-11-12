@@ -65,9 +65,9 @@ def setup_logging(
       1.  applying the logging configuration to the Python logging module
       2.  injecting additional data into the log records via the log factory
       3.  sending a start log and registering to send a stop log
-    :param project_name: The name of the configuration, usually project name, 
+    :param project_name: The name of the configuration, usually project name,
     you want to find
-    :param send_start_log: Whether to send a log to the webserver 
+    :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
     :param always_pass_exc_info: whether to always check for exc_info
     """
@@ -153,23 +153,23 @@ def get_queue_handler(
     logger: logging.Logger = None,
 ) -> logging.handlers.QueueHandler:
     """
-    QueueHandlers are a place to aggregate logs for review internally 
+    QueueHandlers are a place to aggregate logs for review internally
     in your app.  For example, a status bar might
-    want to create a queue, so it can view logs and add their text 
+    want to create a queue, so it can view logs and add their text
     to the status bar without messing up location
     information.
 
-    You can create arbitrarily named queues and reference them later 
+    You can create arbitrarily named queues and reference them later
     in your application.  If a handler with name
     already exists, that will be returned to you.
 
-     :param name: [default] The name of the handler.  
+     :param name: [default] The name of the handler.
      The default is "default"
-     :param max_size: [1000] The number of logs the queue can contain.  
+     :param max_size: [1000] The number of logs the queue can contain.
      If full, insertion of logs will block.
      :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
      :param logger: [root] A logger on which to attach the handler.
-     :param queue: [None] A queue object to pass to a new QueueHandler. 
+     :param queue: [None] A queue object to pass to a new QueueHandler.
       One will be created if queue=None
      :returns handler:  The QueueHandler you requested
     """
