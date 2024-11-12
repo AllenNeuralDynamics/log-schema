@@ -20,22 +20,6 @@ log_record_factory = (
 )  # Needs to be in the global scope
 
 
-def runtime_filter_maker(**filters):
-    """
-    Notes
-    -----
-    - Pattern based off suggested usage in the Python logging cookbook:
-        - https://docs.python.org/3/howto/logging-cookbook.html#using-filters-to-impart-contextual-information
-        - https://docs.python.org/3/howto/logging-cookbook.html#custom-handling-of-levels
-    """
-    def filter(record):
-        for key, value in filters.items():
-            setattr(record, key, value)
-        return True
-
-    return filter
-
-
 class JsonFormatter(logging.Formatter):
     """Formatter to dump error message into JSON"""
 
@@ -119,7 +103,7 @@ def setup_logging(
                 "us-west-2",
             )
         else:
-            pass  # TODO: is there anything else we need to do here?
+            pass  
 
     def record_factory(*args, **kwargs):
         record = log_record_factory(*args, **kwargs)
@@ -137,37 +121,12 @@ def setup_logging(
 
         return record
 
-    log_config_filters = log_config.get("filters", {})
-    if not log_config_filters:
-        log_config["filters"] = {}
-
-    # log_config_filters["watchtower"] = {
-    #     "()": runtime_filter_maker,
-    #     "hostname": config.hostname,
-    #     "comp_id": config.comp_id,
-    #     "version": config.version,
-    #     "project": config.project_name,
-    #     "log_session": config.session_id,
-    #     "user_name": config.user_name,
-    #     **runtime_filters,
-    # }
-    log_config_filters["console_handler"] = {
-        "()": runtime_filter_maker,
-        "hostname": config.hostname,
-        "comp_id": config.comp_id,
-        "version": config.version,
-        "project": config.project_name,
-        "log_session": config.session_id,
-        "user_name": config.user_name,
-        **runtime_filters,
-    }
-
     log_config["formatters"]["simple"]["format"] += ", " + ", ".join(
         map(
             lambda name: name + "=%(" + name + ")s",
             runtime_filters.keys(),
         )
-    )  # TODO: determine if there is a cleaner way to do this
+    )  
 
     logging.setLogRecordFactory(record_factory)
     logging.config.dictConfig(log_config)
