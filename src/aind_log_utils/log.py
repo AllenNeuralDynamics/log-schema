@@ -54,7 +54,10 @@ def load_logging_config(filename: PathLike) -> dict:
 
 
 def setup_logging(
-    project_name: str, send_start_log: bool = True, always_pass_exc_info=False, logger_name='aind_logger',
+    project_name: str, 
+    send_start_log: bool = True, 
+    always_pass_exc_info=False, 
+    logger_name='aind_logger',
     **runtime_filters,
 ):
     """
@@ -62,8 +65,10 @@ def setup_logging(
       1.  applying the logging configuration to the Python logging module
       2.  injecting additional data into the log records via the log factory
       3.  sending a start log and registering to send a stop log
-    :param project_name: The name of the configuration, usually project name, you want to find
-    :param send_start_log: Whether to send a log to the webserver (not desirable for libraries) [default = True]
+    :param project_name: The name of the configuration, usually project name, 
+    you want to find
+    :param send_start_log: Whether to send a log to the webserver 
+    (not desirable for libraries) [default = True]
     :param always_pass_exc_info: whether to always check for exc_info
     """
 
@@ -72,7 +77,8 @@ def setup_logging(
     log_config = load_logging_config(config.log_config_file)
 
     # Find file handlers and ensure the path exists to write the log file
-    # Also, the default file handler "default_file_handler" is renamed to have the project name in it.
+    # Also, the default file handler "default_file_handler" 
+    # is renamed to have the project name in it.
     handlers = log_config["handlers"]
     if "default_file_handler" in handlers:
         handlers["default_file_handler"]["filename"] = handlers[
@@ -95,7 +101,8 @@ def setup_logging(
                 "version": config.version,
                 "hostname": config.hostname,
             }
-            # Here we want to fix up the LOKI log handler via whatever secrets management technique applies.
+            # Here we want to fix up the LOKI log handler via whatever secrets 
+            # management technique applies.
             # Internally, we do this with a keyfile and db
         elif handler["class"] == "watchtower.CloudWatchLogHandler":
             handler["boto3_client"] = boto3.client(
@@ -146,18 +153,24 @@ def get_queue_handler(
     logger: logging.Logger = None,
 ) -> logging.handlers.QueueHandler:
     """
-    QueueHandlers are a place to aggregate logs for review internally in your app.  For example, a status bar might
-    want to create a queue, so it can view logs and add their text to the status bar without messing up location
+    QueueHandlers are a place to aggregate logs for review internally 
+    in your app.  For example, a status bar might
+    want to create a queue, so it can view logs and add their text 
+    to the status bar without messing up location
     information.
 
-    You can create arbitrarily named queues and reference them later in your application.  If a handler with name
+    You can create arbitrarily named queues and reference them later 
+    in your application.  If a handler with name
     already exists, that will be returned to you.
 
-     :param name: [default] The name of the handler.  The default is "default"
-     :param max_size: [1000] The number of logs the queue can contain.  If full, insertion of logs will block.
+     :param name: [default] The name of the handler.  
+     The default is "default"
+     :param max_size: [1000] The number of logs the queue can contain.  
+     If full, insertion of logs will block.
      :param log_level: [logging.INFO] The log level (INFO, WARNING, ERROR, etc)
      :param logger: [root] A logger on which to attach the handler.
-     :param queue: [None] A queue object to pass to a new QueueHandler.  One will be created if queue=None
+     :param queue: [None] A queue object to pass to a new QueueHandler. 
+      One will be created if queue=None
      :returns handler:  The QueueHandler you requested
     """
 
