@@ -19,7 +19,6 @@ log_record_factory = (
     logging.getLogRecordFactory()
 )  # Needs to be in the global scope
 
-
 class JsonFormatter(logging.Formatter):
     """Formatter to dump error message into JSON"""
 
@@ -109,10 +108,12 @@ def setup_logging(
                 "logs",
                 "us-west-2",
             )
-        else:
-            pass  
 
     def record_factory(*args, **kwargs):
+        log_record_factory = (
+            logging.getLogRecordFactory()
+    )         
+
         record = log_record_factory(*args, **kwargs)
         if not record.exc_info and always_pass_exc_info:
             record.exc_info = sys.exc_info()
@@ -133,7 +134,7 @@ def setup_logging(
             lambda name: name + "=%(" + name + ")s",
             runtime_filters.keys(),
         )
-    )  
+    )
 
     logging.setLogRecordFactory(record_factory)
     logging.config.dictConfig(log_config)

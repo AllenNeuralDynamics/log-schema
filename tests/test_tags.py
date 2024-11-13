@@ -20,3 +20,4 @@ def test_logger_with_fixture(capsys):
     captured = capsys.readouterr()
     expected_substrings = "Test, subject_id=999999, session_id=999999-110824"
     assert expected_substrings in captured.out
+
