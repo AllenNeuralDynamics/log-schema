@@ -93,7 +93,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
     return record_factory
 
 
-def prepare_metadata(logger_name, process_name, mouse_id, session_name): 
+def prepare_metadata(logger_name, process_name, mouse_id, session_name):
     log_metadata = {}
 
     # First metadata shared across all AIND processes. Those are the most
