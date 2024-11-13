@@ -15,6 +15,7 @@ import boto3
 
 from aind_log_utils.settings import Settings
 
+
 class JsonFormatter(logging.Formatter):
     """Formatter to dump error message into JSON"""
 
@@ -114,7 +115,6 @@ def setup_logging(
         if not record.exc_info and always_pass_exc_info:
             record.exc_info = sys.exc_info()
             record.exc_text = traceback.format_exc()
-            
         record.hostname = config.hostname
         record.comp_id = config.comp_id
         record.version = config.version
