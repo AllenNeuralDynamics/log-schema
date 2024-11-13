@@ -38,14 +38,14 @@ def process_path(process_name: str) -> pathlib.Path:
         if 'windows' in platform.uname().system.lower():
             path = f'c:/ProgramData/AIND/{process_name}'
         else:
-            path = os.path.expandvars(f'~/.config/AIND/') 
+            path = os.path.expandvars('~/.config/AIND/')
 
     return os.path.expanduser(
         pathlib.Path(path) / "logs" / f"{process_name}.yml")
 
 
 def load_logging_config(process_name: str) -> dict:
-    log_config_file = process_path(process_name) 
+    log_config_file = process_path(process_name)
 
     if not os.path.exists(log_config_file):
         log_config = yaml.safe_load(resources.read_text("aind_log_utils",
@@ -65,14 +65,14 @@ def load_logging_config(process_name: str) -> dict:
     return log_config
 
 
-def make_record_factory(log_metadata, always_pass_exc_info=False):        
+def make_record_factory(log_metadata, always_pass_exc_info=False):
     # We start with the base factory
     log_record_factory = (
         logging.getLogRecordFactory()
     )
     def record_factory(*args, **kwargs):
 
-        record = log_record_factory(*args, **kwargs)        
+        record = log_record_factory(*args, **kwargs)
         # We add the items that we need to track across AIND
 
         if not record.exc_info and always_pass_exc_info:
@@ -93,7 +93,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
 
 
 def setup_logging(
-    process_name: str,    
+    process_name: str,
     logger_name='codeocean_logger',
     mouse_id: str = 'undefined',
     session_name: str = 'undefined',
@@ -115,15 +115,15 @@ def setup_logging(
 
     # We access key metadata that should go with the all logs
     log_metadata = {}
-    
+
     # First metadata shared across all AIND processes. Those are the most
     # important ones.
-    log_metadata['process_name'] = process_name    
+    log_metadata['process_name'] = process_name
     log_metadata['mouse_id'] = mouse_id
     log_metadata['session_name'] = session_name
-    
+
     # To ensure that we can track logs from a single session
-    session_parts = [str(datetime.datetime.now()), 
+    session_parts = [str(datetime.datetime.now()),
                      platform.node(), str(os.getpid())]
     log_metadata['log_session'] = md5((''.join(session_parts)).\
                                       encode("utf-8")).hexdigest()[:7]
@@ -176,8 +176,7 @@ def setup_logging(
                 "us-west-2",
             )
 
-    logging.setLogRecordFactory(make_record_factory(log_metadata,
-                                                     always_pass_exc_info))
+    logging.setLogRecordFactory(make_record_factory(log_metadata, always_pass_exc_info))
 
     logging.config.dictConfig(log_config)
 
