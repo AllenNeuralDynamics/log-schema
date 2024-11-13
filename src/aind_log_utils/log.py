@@ -48,6 +48,7 @@ def load_logging_config(filename: PathLike) -> dict:
 
     return log_config
 
+
 def make_record_factory(config, runtime_filters, always_pass_exc_info=False):
     def record_factory(*args, **kwargs):
         log_record_factory = (
@@ -69,6 +70,7 @@ def make_record_factory(config, runtime_filters, always_pass_exc_info=False):
 
         return record
     return record_factory
+
 
 def setup_logging(
     project_name: str,
@@ -137,7 +139,7 @@ def setup_logging(
     logging.setLogRecordFactory(make_record_factory(config,
                                                     runtime_filters,
                                                     always_pass_exc_info))
-    
+
     logging.config.dictConfig(log_config)
 
     if send_start_log:
