@@ -70,6 +70,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
     log_record_factory = (
         logging.getLogRecordFactory()
     )
+
     def record_factory(*args, **kwargs):
 
         record = log_record_factory(*args, **kwargs)
@@ -91,29 +92,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
         return record
     return record_factory
 
-
-def setup_logging(
-    process_name: str,
-    logger_name='codeocean_logger',
-    mouse_id: str='undefined',
-    session_name: str='undefined',
-    send_start_log: bool=True,
-    always_pass_exc_info=False,
-):
-    """
-    Logging setup consists of
-      1.  applying the logging configuration to the Python logging module
-      2.  injecting additional data into the log records via the log factory
-      3.  sending a start log and registering to send a stop log
-    :param process_name: The name of the configuration, usually process name,
-    you want to find
-    :param send_start_log: Whether to send a log to the webserver
-    (not desirable for libraries) [default = True]
-    :param always_pass_exc_info: whether to always check for exc_info
-    """
-    log_config = load_logging_config(process_name)
-
-    # We access key metadata that should go with the all logs
+def prepare_metadata(logger_name, process_name, mouse_id, session_name): 
     log_metadata = {}
 
     # First metadata shared across all AIND processes. Those are the most
@@ -148,6 +127,32 @@ def setup_logging(
         log_metadata['version'] = os.getenv("CO_CAPSULE_ID", "undefined")
         log_metadata['process_name'] = process_name
 
+    return log_metadata
+
+def setup_logging(
+    process_name: str,
+    logger_name = 'codeocean_logger',
+    mouse_id: str = 'undefined',
+    session_name: str = 'undefined',
+    send_start_log: bool = True,
+    always_pass_exc_info = False,
+):
+    """
+    Logging setup consists of
+      1.  applying the logging configuration to the Python logging module
+      2.  injecting additional data into the log records via the log factory
+      3.  sending a start log and registering to send a stop log
+    :param process_name: The name of the configuration, usually process name,
+    you want to find
+    :param send_start_log: Whether to send a log to the webserver
+    (not desirable for libraries) [default = True]
+    :param always_pass_exc_info: whether to always check for exc_info
+    """
+    log_config = load_logging_config(process_name)
+
+    log_metadata = prepare_metadata(logger_name, process_name, 
+                                    mouse_id, session_name)
+
     # Find file handlers and ensure the path exists to write the log file
     # Also, the default file handler "default_file_handler"
     # is renamed to have the process name in it.
@@ -176,7 +181,7 @@ def setup_logging(
                 "us-west-2",
             )
 
-    logging.setLogRecordFactory(make_record_factory(log_metadata, 
+    logging.setLogRecordFactory(make_record_factory(log_metadata,
                                                     always_pass_exc_info))
 
     logging.config.dictConfig(log_config)
