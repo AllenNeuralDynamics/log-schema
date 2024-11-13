@@ -2,6 +2,9 @@
 
 disable_existing_loggers: true
 formatters:
+  codeocean:
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s'
   detailed:
     datefmt: '%m/%d/%Y %I:%M:%S %p'
     format: '%(asctime)s, %(levelname)s, %(module)s::%(lineno)s, %(message)s'
@@ -16,12 +19,17 @@ handlers:
     class: logging.StreamHandler
     formatter: simple
     level: INFO
-    stream: sys.stdout
+    stream: ext://sys.stdout
+  codeoocean_handler:
+    class: logging.StreamHandler
+    formatter: codeocean
+    level: INFO
+    stream: ext://sys.stdout
   default_file_handler:
     backupCount: 20
     class: logging.handlers.RotatingFileHandler
     encoding: utf8
-    filename: c:/programdata/AIND/{project_name}/{project_name}.log
+    filename: c:/programdata/AIND/{process_name}/{process_name}.log
     formatter: simple
     level: INFO
     maxBytes: 10485760
@@ -32,7 +40,7 @@ handlers:
     level: INFO
     url: https://logs-prod-021.grafana.net/loki/api/v1/push
     tags:
-      project_name: ''
+      process_name: ''
       comp_id: ''
       log_session: ''
       user_name: ''
@@ -54,6 +62,10 @@ loggers:
     handlers:
     - console_handler
     level: INFO
+    propagate: False
+  codeocean_logger:
+    handlers:
+    - codeoocean_handler
+    level: INFO
     propagate: True
-
 version: 1
