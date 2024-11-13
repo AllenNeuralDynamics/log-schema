@@ -95,11 +95,11 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
 def setup_logging(
     process_name: str,
     logger_name='codeocean_logger',
-    mouse_id: str = 'undefined',
-    session_name: str = 'undefined',
-    send_start_log: bool = True,
-    always_pass_exc_info = False,
-    ):
+    mouse_id: str='undefined',
+    session_name: str='undefined',
+    send_start_log: bool=True,
+    always_pass_exc_info=False,
+):
     """
     Logging setup consists of
       1.  applying the logging configuration to the Python logging module
@@ -125,24 +125,24 @@ def setup_logging(
     # To ensure that we can track logs from a single session
     session_parts = [str(datetime.datetime.now()),
                      platform.node(), str(os.getpid())]
-    log_metadata['log_session'] = md5((''.join(session_parts)).\
+    log_metadata['log_session'] = md5((''.join(session_parts)).
                                       encode("utf-8")).hexdigest()[:7]
 
     # These are the metadata that are specific to the logger
-    if logger_name=='aind_logger':
+    if logger_name == 'aind_logger':
         log_metadata['hostname'] = platform.uname().node
         log_metadata['comp_id'] = os.getenv("aibs_comp_id", "undefined")
-        log_metadata['user_name'] = getpass.getuser() 
+        log_metadata['user_name'] = getpass.getuser()
         try:
             frame = inspect.currentframe().f_back
             module = inspect.getmodule(frame)
             log_metadata['version'] = importlib.metadata.version(
                 module.__package__)
-        except:
-            log_metadata['version'] = 'N/A'  
-            # Probably a 1 off script that's not installed 
+        except Exception:
+            log_metadata['version'] = 'N/A'
+            # Probably a 1 off script that's not installed
             # so it likely won't have a version
-    elif logger_name=='codeocean_logger':
+    elif logger_name == 'codeocean_logger':
         log_metadata['hostname'] = os.getenv("HOSTNAME", "undefined")
         log_metadata['comp_id'] = os.getenv("CO_COMPUTATION_ID", "undefined")
         log_metadata['version'] = os.getenv("CO_CAPSULE_ID", "undefined")
@@ -176,7 +176,8 @@ def setup_logging(
                 "us-west-2",
             )
 
-    logging.setLogRecordFactory(make_record_factory(log_metadata, always_pass_exc_info))
+    logging.setLogRecordFactory(make_record_factory(log_metadata, 
+                                                    always_pass_exc_info))
 
     logging.config.dictConfig(log_config)
 
