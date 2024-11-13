@@ -92,6 +92,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=False):
         return record
     return record_factory
 
+
 def prepare_metadata(logger_name, process_name, mouse_id, session_name): 
     log_metadata = {}
 
@@ -129,13 +130,14 @@ def prepare_metadata(logger_name, process_name, mouse_id, session_name):
 
     return log_metadata
 
+
 def setup_logging(
     process_name: str,
-    logger_name = 'codeocean_logger',
+    logger_name: str = 'codeocean_logger',
     mouse_id: str = 'undefined',
     session_name: str = 'undefined',
     send_start_log: bool = True,
-    always_pass_exc_info = False,
+    always_pass_exc_info: bool = False,
 ):
     """
     Logging setup consists of
@@ -150,7 +152,7 @@ def setup_logging(
     """
     log_config = load_logging_config(process_name)
 
-    log_metadata = prepare_metadata(logger_name, process_name, 
+    log_metadata = prepare_metadata(logger_name, process_name,
                                     mouse_id, session_name)
 
     # Find file handlers and ensure the path exists to write the log file
