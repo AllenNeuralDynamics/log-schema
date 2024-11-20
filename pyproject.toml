@@ -35,6 +35,8 @@ dev = [
     'Sphinx',
     'furo'
 ]
+[tool.flake8]
+max-line-length = 120
 
 [tool.setuptools.packages.find]
 where = ["src"]
