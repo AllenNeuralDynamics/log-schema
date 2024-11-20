@@ -20,7 +20,8 @@ def log_record():
 
 def test_json_formatter(log_record):
     formatter = log.JsonFormatter()
-    expected = '{"level": "INFO", "date": "2024-11-19 12:35:06,000", "message": "test log message", "module": "aind-log-utils", "lineno": 100}'
+    expected = ('{"level": "INFO", "date": "2024-11-19 12:35:06,000", "message": "test log message", "module": '
+                '"aind-log-utils", "lineno": 100}')
     assert expected == formatter.format(log_record)
 
 
