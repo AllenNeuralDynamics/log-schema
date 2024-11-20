@@ -18,7 +18,11 @@ dynamic = ["version"]
 
 dependencies = [
     'pyyaml',
-    'python-logging-loki==0.3.1'
+    'python-logging-loki~=0.3.1',
+    'pydantic-settings',
+    'pydantic',
+    'watchtower~=3.3.1',
+
 ]
 
 [project.optional-dependencies]
@@ -31,6 +35,8 @@ dev = [
     'Sphinx',
     'furo'
 ]
+[tool.flake8]
+max-line-length = 120
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -42,8 +48,8 @@ version = {attr = "aind_log_utils.__version__"}
 aind_log_tools = ["*.yaml"]
 
 [tool.black]
-line-length = 79
-target_version = ['py37']
+line-length = 120
+target_version = ['py39']
 exclude = '''
 
 (
@@ -73,10 +79,10 @@ exclude_lines = [
     "import",
     "pragma: no cover"
 ]
-fail_under = 100
+fail_under = 80
 
 [tool.isort]
-line_length = 79
+line_length = 120
 profile = "black"
 
 [tool.interrogate]

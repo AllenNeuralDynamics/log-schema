@@ -2,6 +2,9 @@
 
 disable_existing_loggers: true
 formatters:
+  codeocean:
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s'
   detailed:
     datefmt: '%m/%d/%Y %I:%M:%S %p'
     format: '%(asctime)s, %(levelname)s, %(module)s::%(lineno)s, %(message)s'
@@ -17,23 +20,27 @@ handlers:
     formatter: simple
     level: INFO
     stream: ext://sys.stdout
-
+  codeoocean_handler:
+    class: logging.StreamHandler
+    formatter: codeocean
+    level: INFO
+    stream: ext://sys.stdout
   default_file_handler:
     backupCount: 20
     class: logging.handlers.RotatingFileHandler
     encoding: utf8
-    filename: c:/programdata/AIND/{project_name}/{project_name}.log
+    filename: c:/programdata/AIND/{process_name}/{process_name}.log
     formatter: simple
     level: INFO
     maxBytes: 10485760
-
+  #  https://github:com/greyzmeem/python-logging-loki
   loki_handler:
     class: logging_loki.LokiHandler
     formatter: log_server
     level: INFO
     url: https://logs-prod-021.grafana.net/loki/api/v1/push
     tags:
-      project_name: ''
+      process_name: ''
       comp_id: ''
       log_session: ''
       user_name: ''
@@ -41,14 +48,24 @@ handlers:
     auth:
       - ''
       - ''
+  #  https://github:com/kislyuk/watchtower
+  watchtower:
+    class: watchtower.CloudWatchLogHandler
+    level: INFO
+    log_group_name: '/aws/batch/job'
+    log_stream_name: "{logger_name}-{strftime:%y-%m-%d}"
+    send_interval: 10
+    create_log_group: False
+
 loggers:
   aind_logger:
     handlers:
     - console_handler
-    - default_file_handler
-    - loki_handler
     level: INFO
     propagate: False
-
-
+  codeocean_logger:
+    handlers:
+    - codeoocean_handler
+    level: INFO
+    propagate: True
 version: 1
