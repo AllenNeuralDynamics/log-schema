@@ -10,9 +10,8 @@ import traceback
 from hashlib import md5
 from importlib import resources
 import yaml
-import boto3
 
-def make_record_factory(log_metadata, always_pass_exc_info=True):
+def make_record_factory(log_metadata):
     # We start with the base factory
     log_record_factory = (
         logging.getLogRecordFactory()
@@ -23,9 +22,8 @@ def make_record_factory(log_metadata, always_pass_exc_info=True):
         record = log_record_factory(*args, **kwargs)
         # We add the items that we need to track across AIND
 
-        if not record.exc_info and always_pass_exc_info:
-            record.exc_info = sys.exc_info()
-            record.exc_text = traceback.format_exc()
+        record.exc_info = sys.exc_info()
+        record.exc_text = traceback.format_exc()
 
         record.hostname = log_metadata.get('hostname', 'undefined')
         record.comp_id = log_metadata.get('comp_id', 'undefined')
@@ -40,7 +38,7 @@ def make_record_factory(log_metadata, always_pass_exc_info=True):
     return record_factory
 
 
-def prepare_metadata(logger_name, process_name, mouse_id, session_name):
+def prepare_metadata(process_name, mouse_id, session_name):
     log_metadata = {}
 
     # First metadata shared across all AIND processes. Those are the most
@@ -64,59 +62,31 @@ def prepare_metadata(logger_name, process_name, mouse_id, session_name):
 
 def setup_logging(
     process_name: str,
-    logger_name: str = 'codeocean_logger',
     mouse_id: str = 'undefined',
     session_name: str = 'undefined',
     send_start_log: bool = True,
-    always_pass_exc_info: bool = True,
 ):
     """
     Logging setup consists of
       1.  applying the logging configuration to the Python logging module
       2.  injecting additional data into the log records via the log factory
       3.  sending a start log and registering to send a stop log
-    :param process_name: The name of the configuration, usually process name,
-    you want to find
+    :param process_name: The name of the process to track
+    :param mouse_id: The mouse ID to track
+    :param session_name: The session name to track
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
-    :param always_pass_exc_info: whether to always check for exc_info
     """
     log_config = yaml.safe_load(resources.read_text("aind_log_utils",
                                                             "default_logging.yml"))
     
-    log_metadata = prepare_metadata(logger_name, process_name,
+    log_metadata = prepare_metadata(process_name,
                                     mouse_id, session_name)
 
-    # Find file handlers and ensure the path exists to write the log file
-    # Also, the default file handler "default_file_handler"
-    # is renamed to have the process name in it.
-    handlers = log_config["handlers"]
-    if "default_file_handler" in handlers:
-        handlers["default_file_handler"]["filename"] = handlers[
-            "default_file_handler"
-        ]["filename"].format(process_name=process_name)
-
-    # Here we prepare the handlers for the loggers
-    for handler in handlers.values():
-        # Configure all file handlers
-        if handler["class"] == "logging_loki.LokiHandler":
-            handler["tags"] = log_metadata
-            # Here we want to fix up the LOKI log handler via whatever secrets
-            # management technique applies.
-            # Internally, we do this with a keyfile and db
-        elif handler["class"] == "watchtower.CloudWatchLogHandler":
-            handler["boto3_client"] = boto3.client(
-                "logs",
-                "us-west-2",
-            )
-
-    logging.setLogRecordFactory(make_record_factory(log_metadata,
-                                                    always_pass_exc_info))
+    logging.setLogRecordFactory(make_record_factory(log_metadata))
 
     logging.config.dictConfig(log_config)
 
     if send_start_log:
         logging.info("Starting")
         atexit.register(lambda: logging.info("Stopping"))
-
-    return logging.getLogger(logger_name)
