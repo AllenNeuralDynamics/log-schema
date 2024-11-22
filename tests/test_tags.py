@@ -1,6 +1,7 @@
 from aind_log_utils import log
 import logging
 
+
 def test_logger_with_fixture(capsys):
     # Perform logging actions
 
