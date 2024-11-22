@@ -78,8 +78,8 @@ def setup_logging(
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
     """
-    log_config = yaml.safe_load(resources.read_text("aind_log_utils",
-                                                        "default_logging.yml"))
+    log_config = yaml.safe_load(resources.read_text("aind_log_utils", 
+                                                    "default_logging.yml"))
 
     log_metadata = prepare_metadata(process_name,
                                     mouse_id, session_name)

@@ -8,27 +8,17 @@
 ![Python](https://img.shields.io/badge/python->=3.7-blue?logo=python)
 
 
-
 ## Usage
 Typical programmatic usage of this library looks like this:
 ```python
 import logging
 from aind_log_utils import setup_logging
 
-logger = setup_logging("my_project_name")
+setup_logging("my_project_name",  mouse_id="mouse1", 
+                        session_name="session1")
+                        
 logging.info("my log message")
-
-# Tags represent query terms in Grafana
-logging.info("another log", extra={'tags': {'mouse_id': 900002}})
 ```
-
-When you first run this code, it will create a logging configuration file for you in `c:\ProgramData\AIND\my_project_name`
-For now, until it is decided how to handle secrets management, you will need to edit this file and add the LOKI credentials.
-
-Several settings can be overridden as environment variables with a prefix of `aind_log_utils_`.  Most notably:
-- `aind_log_utils_dev_mode`:  default: `False`.  displays errors during logging configuration
-- `aind_log_utils_log_config_file`: default: `c:\ProgramData\AIND\my_project_name\logs\my_project_name.yml` which is 
-useful for experimenting with other logging configuration.
 
 ## Installation
 To use the software, in the root directory, run
@@ -40,12 +30,6 @@ To develop the code, run
 ```bash
 pip install -e .[dev]
 ```
-
-## Examples
-```
-```
-
-## Contributing
 
 ### Linters and testing
 
