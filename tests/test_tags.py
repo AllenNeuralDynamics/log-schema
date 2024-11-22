@@ -1,5 +1,5 @@
 from aind_log_utils import log
-
+import logging
 
 def test_logger_with_fixture(capsys):
     # Perform logging actions
@@ -9,13 +9,14 @@ def test_logger_with_fixture(capsys):
     subject_id = "999999"
     session_name = f"{subject_id}-110824"
 
-    logger = log.setup_logging(
+    log.setup_logging(
         "capsule",
         mouse_id=subject_id,
         session_name=session_name,
+        send_start_log=False,
         )
 
-    logger.info(message_template)
+    logging.info(message_template)
 
     captured = capsys.readouterr()
     print(captured.out)
