@@ -1,44 +1,16 @@
 # introduced with MPETK....
-
-disable_existing_loggers: true
+# disable_existing_loggers: true
 formatters:
   codeocean:
     datefmt: '%Y-%m-%d %H:%M:%S'
     format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s'
-  log_server:
-    datefmt: '%Y-%m-%d %H:%M:%S'
-    format: '%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s'
 handlers:
   codeoocean_handler:
     class: logging.StreamHandler
     formatter: codeocean
     level: INFO
     stream: ext://sys.stdout
-  loki_handler:
-    class: logging_loki.LokiHandler
-    formatter: log_server
-    level: INFO
-    url: https://logs-prod-021.grafana.net/loki/api/v1/push
-    tags:
-      process_name: ''
-      comp_id: ''
-      log_session: ''
-      user_name: ''
-    version: '1'
-    auth:
-      - ''
-      - ''
-  #  https://github:com/kislyuk/watchtower
-  watchtower:
-    class: watchtower.CloudWatchLogHandler
-    level: INFO
-    log_group_name: '/aws/batch/job'
-    log_stream_name: "{logger_name}-{strftime:%y-%m-%d}"
-    send_interval: 10
-    create_log_group: False
-
-loggers:
-  codeocean_logger:
+root:
     handlers:
     - codeoocean_handler
     level: INFO
