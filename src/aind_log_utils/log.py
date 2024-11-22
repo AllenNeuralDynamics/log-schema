@@ -11,6 +11,7 @@ from hashlib import md5
 from importlib import resources
 import yaml
 
+
 def make_record_factory(log_metadata):
     # We start with the base factory
     log_record_factory = (
@@ -78,8 +79,8 @@ def setup_logging(
     (not desirable for libraries) [default = True]
     """
     log_config = yaml.safe_load(resources.read_text("aind_log_utils",
-                                                            "default_logging.yml"))
-    
+                                                        "default_logging.yml"))
+
     log_metadata = prepare_metadata(process_name,
                                     mouse_id, session_name)
 
