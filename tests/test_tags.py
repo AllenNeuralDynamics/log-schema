@@ -63,8 +63,6 @@ class TestLogUtils(TestCase):
         from io import StringIO
         import sys
 
-        from io import StringIO
-        import sys
         captured_output = StringIO()
         sys.stdout = captured_output
 
@@ -90,38 +88,25 @@ class TestLogUtils(TestCase):
         self.assertIn(expected_substrings, captured_content)
 
     def test_setup_logging_without_start_log(self):
-        with mock.patch("aind_log_utils.log.resources.read_text", return_value="""
-            version: 1
-            formatters:
-              default:
-                format: '%(levelname)s:%(message)s'
-            handlers:
-              console:
-                class: logging.StreamHandler
-                formatter: default
-                stream: ext://sys.stdout
-            root:
-              level: INFO
-              handlers: [console]
-        """):
-            # Simulate capturing logs with capsys equivalent
-            from io import StringIO
-            import sys
-            captured_output = StringIO()
-            sys.stdout = captured_output
+        # Simulate capturing logs with capsys equivalent
+        from io import StringIO
+        import sys
 
-            log.setup_logging(
-                process_name="test-process",
-                mouse_id="mouse123",
-                session_name="session-abc",
-                send_start_log=False
-            )
+        captured_output = StringIO()
+        sys.stdout = captured_output
 
-            logging.info("Log message without start log")
+        log.setup_logging(
+            process_name="test-process",
+            mouse_id="mouse123",
+            session_name="session-abc",
+            send_start_log=False
+        )
 
-            # Restore sys.stdout
-            sys.stdout = sys.__stdout__
+        logging.info("Log message without start log")
 
-            # Check captured output
-            captured_content = captured_output.getvalue()
-            self.assertIn("INFO:Log message without start log", captured_content)
+        # Restore sys.stdout
+        sys.stdout = sys.__stdout__
+
+        # Check captured output
+        captured_content = captured_output.getvalue()
+        self.assertIn("Log message without start log", captured_content)

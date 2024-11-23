@@ -3,7 +3,7 @@
 formatters:
   codeocean:
     datefmt: '%Y-%m-%d %H:%M:%S'
-    format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s'
+    format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s, %(message)s'
 handlers:
   codeoocean_handler:
     class: logging.StreamHandler
