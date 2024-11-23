@@ -1,6 +1,5 @@
 import logging
 import os
-import platform
 from unittest import mock
 from aind_log_utils import log
 
@@ -41,7 +40,14 @@ def test_make_record_factory():
     }
 
     factory = log.make_record_factory(metadata)
-    record = factory(name="test", level=logging.INFO, pathname="path", lineno=10, msg="test-message", args=(), exc_info=None)
+    record = factory(name="test",
+                     level=logging.INFO,
+                     pathname="path",
+                     lineno=10,
+                     msg="test-message",
+                     args=(),
+                     exc_info=None
+                     )
 
     assert record.hostname == "test-host"
     assert record.comp_id == "test-comp-id"
@@ -72,6 +78,7 @@ def test_logger_with_fixture(capsys):
     captured = capsys.readouterr()
     expected_substrings = "999999, 999999-110824"
     assert expected_substrings in captured.out
+
 
 def test_setup_logging_without_start_log(capsys):
     with mock.patch("aind_log_utils.log.resources.read_text", return_value="""
