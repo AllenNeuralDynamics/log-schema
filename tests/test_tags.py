@@ -99,7 +99,7 @@ class TestLogUtils(TestCase):
         expected_substrings = "999999, 999999-110824"
         self.assertIn(expected_substrings, captured_content)
 
-    def test_setup_logging_without_start_log(self):
+    def test_setup_logging(self):
         """
         Test that the logger is correctly set up without sending the start log
         """
@@ -113,8 +113,7 @@ class TestLogUtils(TestCase):
         log.setup_logging(
             process_name="test-process",
             mouse_id="mouse123",
-            session_name="session-abc",
-            send_start_log=False
+            session_name="session-abc"
         )
 
         logging.info("Log message without start log")
