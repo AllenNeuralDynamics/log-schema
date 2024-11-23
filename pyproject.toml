@@ -3,13 +3,10 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aind_log_utils"
-description = "Generated from aind-library-template"
+name = "aind-log-utils"
+description = "Add logging to Code Ocean capsules"
 license = {text = "MIT"}
 requires-python = ">=3.7"
-authors = [
-    {name = "Ross Hytnen"}
-]
 classifiers = [
     "Programming Language :: Python :: 3"
 ]
@@ -18,11 +15,6 @@ dynamic = ["version"]
 
 dependencies = [
     'pyyaml',
-    'python-logging-loki~=0.3.1',
-    'pydantic-settings',
-    'pydantic',
-    'watchtower~=3.3.1',
-
 ]
 
 [project.optional-dependencies]
