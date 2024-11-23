@@ -1,3 +1,4 @@
+""" Tests for the log utility functions """
 import logging
 import os
 from unittest import mock, TestCase
@@ -5,7 +6,9 @@ from aind_log_utils import log
 
 
 class TestLogUtils(TestCase):
-
+    """
+    Test the log utility functions
+    """
     def test_prepare_metadata(self):
         """
         Test that the metadata is correctly prepared
