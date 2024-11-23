@@ -13,13 +13,25 @@ import yaml
 
 
 def make_record_factory(log_metadata):
+    """
+    This function creates a log record factory that adds metadata to the log
+    records. This metadata is shared across all AIND code ocean processes.
+    :param log_metadata: A dictionary with the metadata to add to the log
+    records
+    :return: A log record factory that adds the metadata to the log records
+    """
     # We start with the base factory
     log_record_factory = (
         logging.getLogRecordFactory()
     )
 
     def record_factory(*args, **kwargs):
-
+        """
+        This function creates a log record with the metadata added
+        :param args: The arguments to pass to the log record factory
+        :param kwargs: The keyword arguments to pass to the log record factory
+        :return: A log record with the metadata added
+        """
         record = log_record_factory(*args, **kwargs)
         # We add the items that we need to track across AIND
 
@@ -40,6 +52,14 @@ def make_record_factory(log_metadata):
 
 
 def prepare_metadata(process_name, mouse_id, session_name):
+    """
+    This function prepares the metadata that is attached to all logs.
+    :param process_name: The name of the process to track
+    :param mouse_id: The mouse ID to track
+    :param session_name: The session name to track
+    :return: A dictionary with the metadata to add to the log records
+    """
+
     log_metadata = {}
 
     # First metadata shared across all AIND processes. Those are the most
