@@ -14,9 +14,9 @@ Typical programmatic usage of this library looks like this:
 import logging
 from aind_log_utils import setup_logging
 
-setup_logging("my_project_name",  mouse_id="mouse1", 
+setup_logging("my_process_name", mouse_id="mouse1", 
                         session_name="session1")
-                        
+
 logging.info("my log message")
 ```
 
