@@ -1,3 +1,6 @@
+""" This file is the main file for the aind-log-utils package. It contains the
+functions that are meant to be used by the users of the package.
+"""
 import atexit
 import datetime
 import logging
