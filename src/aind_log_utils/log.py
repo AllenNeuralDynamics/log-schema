@@ -129,6 +129,7 @@ def setup_logging(
     logger = logging.getLogger()
     logger.handlers[1].formatter.add_log_record_attrs = ['levelname',
                                                          'filename',
+                                                         'mouse_id',
                                                          'process',
                                                          'thread',
                                                          'lineno',
@@ -138,7 +139,6 @@ def setup_logging(
                                                          'version',
                                                          'log_session',
                                                          'user_name',
-                                                         'mouse_id',
                                                          'session_name',
                                                          'process_name',
                                                          'exc_info',
