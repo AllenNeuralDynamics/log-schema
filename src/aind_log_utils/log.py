@@ -13,7 +13,8 @@ import traceback
 from hashlib import md5
 from importlib import resources
 import yaml
-
+import boto3
+import watchtower
 
 def make_record_factory(log_metadata):
     """
@@ -101,6 +102,8 @@ def setup_logging(
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
     """
+    boto3_logs_client = boto3.client("logs", region_name="us-west-2")
+    
     log_config = yaml.safe_load(resources.read_text("aind_log_utils",
                                                     "default_logging.yml"))
 
@@ -108,7 +111,8 @@ def setup_logging(
                                     mouse_id, session_name)
 
     logging.setLogRecordFactory(make_record_factory(log_metadata))
-
+    logger = logging.getLogger()
+    logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'process', 'thread']
     logging.config.dictConfig(log_config)
 
     if send_start_log:
