@@ -8,7 +8,7 @@ handlers:
   watchtower: 
     class: watchtower.CloudWatchLogHandler
     boto3_client: boto3_logs_client
-    log_group_name': '/aind/internal_logs'
+    log_group_name: '/aind/internal_logs'
     log_stream_name: '{log_stream_name}'  
     level: INFO     
   codeoocean_handler:
@@ -18,8 +18,8 @@ handlers:
     stream: ext://sys.stdout
 root:
     handlers:
-    - codeoocean_handler
-    - watchtower
+      - codeoocean_handler
+      - watchtower
     level: INFO
     propagate: True
 version: 1

@@ -109,12 +109,16 @@ def setup_logging(
                                                     "default_logging.yml"))
     log_config['handlers']['watchtower']['log_stream_name'] = log_metadata['version']
 
-
+    
     logging.setLogRecordFactory(make_record_factory(log_metadata))
-    logger = logging.getLogger()
-    logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'process', 'thread']
     logging.config.dictConfig(log_config)
+    logger = logging.getLogger('root')
+    return logger
+    print(logger.handlers)
+    logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'process', 'thread']
+    
 
     if send_start_log:
         logging.info("Starting")
         atexit.register(lambda: logging.info("Stopping"))
+
