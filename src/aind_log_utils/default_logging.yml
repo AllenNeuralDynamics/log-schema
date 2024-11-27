@@ -8,8 +8,8 @@ handlers:
   watchtower: 
     class: watchtower.CloudWatchLogHandler
     boto3_client: boto3_logs_client
-    log_group_name: aind/internal_logs
-    log_stream_name: '{log_stream_name}'  
+    log_group_name: aind_internal_logs
+    log_stream_name: undefined
     level: INFO     
   codeoocean_handler:
     class: logging.StreamHandler
