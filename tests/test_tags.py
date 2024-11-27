@@ -4,6 +4,8 @@ import os
 from unittest import mock, TestCase
 from aind_log_utils import log
 
+from unittest.mock import patch
+import io
 
 class TestLogUtils(TestCase):
     """
@@ -99,6 +101,8 @@ class TestLogUtils(TestCase):
         expected_substrings = "999999, 999999-110824"
         self.assertIn(expected_substrings, captured_content)
 
+    @patch('sys.stdout', new_callable=io.StringIO)
+    @patch('sys.stderr', new_callable=io.StringIO)
     def test_setup_logging(self):
         """
         Test that the logger is correctly set up without sending the start log
