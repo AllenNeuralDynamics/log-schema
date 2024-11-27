@@ -5,6 +5,12 @@ formatters:
     datefmt: '%Y-%m-%d %H:%M:%S'
     format: '%(asctime)s, %(process_name)s, %(comp_id)s, %(hostname)s, %(version)s, %(log_session)s, %(mouse_id)s, %(session_name)s, %(message)s'
 handlers:
+  watchtower: 
+    class: watchtower.CloudWatchLogHandler
+    boto3_client: boto3_logs_client
+    log_group_name': '/aind/internal_logs'
+    log_stream_name: '{log_stream_name}'  
+    level: INFO     
   codeoocean_handler:
     class: logging.StreamHandler
     formatter: codeocean
@@ -13,6 +19,7 @@ handlers:
 root:
     handlers:
     - codeoocean_handler
+    - watchtower
     level: INFO
     propagate: True
 version: 1
