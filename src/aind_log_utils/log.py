@@ -133,7 +133,6 @@ def setup_logging(
                                                          'thread',
                                                          'lineno',
                                                          'message',
-                                                         'asctime',
                                                          'hostname',
                                                          'comp_id',
                                                          'version',
