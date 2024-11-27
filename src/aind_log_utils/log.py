@@ -108,13 +108,11 @@ def setup_logging(
     log_config = yaml.safe_load(resources.read_text("aind_log_utils",
                                                     "default_logging.yml"))
     log_config['handlers']['watchtower']['log_stream_name'] = log_metadata['version']
-
+    log_config['handlers']['watchtower']['boto3_client'] = boto3_logs_client
     
     logging.setLogRecordFactory(make_record_factory(log_metadata))
     logging.config.dictConfig(log_config)
     logger = logging.getLogger('root')
-    return logger
-    print(logger.handlers)
     logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'process', 'thread']
     
 
