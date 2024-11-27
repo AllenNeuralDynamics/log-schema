@@ -134,7 +134,7 @@ def setup_logging(
     
     logging.setLogRecordFactory(make_record_factory(log_metadata))
     logging.config.dictConfig(LOGGING)
-    logger = logging.getLogger('root')
+    logger = logging.getLogger()
     logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'process', 'thread']
     
 
