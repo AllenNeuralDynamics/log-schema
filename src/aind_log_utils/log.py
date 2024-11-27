@@ -103,12 +103,12 @@ def setup_logging(
     (not desirable for libraries) [default = True]
     """
     boto3_logs_client = boto3.client("logs", region_name="us-west-2")
-    
+    log_metadata = prepare_metadata(process_name, mouse_id, session_name)
+
     log_config = yaml.safe_load(resources.read_text("aind_log_utils",
                                                     "default_logging.yml"))
+    log_config['handlers']['watchtower']['log_stream_name'] = log_metadata['version']
 
-    log_metadata = prepare_metadata(process_name,
-                                    mouse_id, session_name)
 
     logging.setLogRecordFactory(make_record_factory(log_metadata))
     logger = logging.getLogger()
