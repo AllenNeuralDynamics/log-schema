@@ -59,7 +59,7 @@ def make_record_factory(log_metadata):
 
         record.hostname = log_metadata.get('hostname', 'undefined')
         record.comp_id = log_metadata.get('comp_id', 'undefined')
-        record.version = log_metadata.get('version', 'undefined')
+        record.version = log_metadata.get('capsule_id', 'undefined')
         record.log_session = log_metadata.get('log_session', 'undefined')
         record.user_name = log_metadata.get('user_name', 'undefined')
         record.mouse_id = log_metadata.get('mouse_id', 'undefined')
