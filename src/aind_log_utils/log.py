@@ -148,23 +148,11 @@ def setup_logging(
         logging.setLogRecordFactory(make_record_factory(log_metadata))
         logging.config.dictConfig(log_config)
         logger = logging.getLogger()
-        logger.handlers[1].formatter.add_log_record_attrs = ['levelname',
-                                                            'filename',
-                                                            'mouse_id',
-                                                            'process',
-                                                            'thread',
-                                                            'lineno',
-                                                            'message',
-                                                            'hostname',
-                                                            'comp_id',
-                                                            'version',
-                                                            'log_session',
-                                                            'user_name',
-                                                            'session_name',
-                                                            'process_name',
-                                                            'exc_info',
-                                                            'exc_text'
-                                                            ]
+        logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'mouse_id', 'process', 'thread',
+                                                             'lineno', 'message', 'hostname', 'comp_id', 'version',
+                                                             'log_session', 'user_name', 'session_name', 'process_name',
+                                                             'exc_info', 'exc_text'
+                                                             ]
     else:
         log_config = {
             'version': 1,
