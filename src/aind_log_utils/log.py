@@ -12,7 +12,6 @@ import sys
 import traceback
 from hashlib import md5
 import boto3
-import watchtower
 
 
 def check_aws_credentials():
