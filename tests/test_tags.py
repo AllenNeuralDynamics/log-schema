@@ -4,7 +4,6 @@ import os
 from unittest import mock, TestCase
 from aind_log_utils import log
 from io import StringIO
-import sys
 from botocore.exceptions import ClientError
 
 
@@ -107,7 +106,7 @@ class TestLogUtils(TestCase):
         Test that the logger is correctly set up with mocked AWS environment
         """
         captured_output = StringIO()
-        
+
         # Mock AWS credentials (dummy values)
         mock_aws_credentials = mock.Mock()
         mock_aws_credentials.access_key = "mock-access-key"
