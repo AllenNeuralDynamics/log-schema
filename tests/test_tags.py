@@ -43,7 +43,7 @@ class TestLogUtils(TestCase):
         metadata = {
             "hostname": "test-host",
             "comp_id": "test-comp-id",
-            "version": "test-version",
+            "capsule_id": "test-cap-id",
             "log_session": "test-session",
             "user_name": "test-user",
             "mouse_id": "mouse123",
@@ -63,7 +63,7 @@ class TestLogUtils(TestCase):
 
         self.assertEqual(record.hostname, "test-host")
         self.assertEqual(record.comp_id, "test-comp-id")
-        self.assertEqual(record.version, "test-version")
+        self.assertEqual(record.version, "test-cap-id")
         self.assertEqual(record.log_session, "test-session")
         self.assertEqual(record.mouse_id, "mouse123")
         self.assertEqual(record.session_name, "session-abc")
