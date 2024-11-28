@@ -24,15 +24,11 @@ def check_aws_credentials():
     if not credentials or not credentials.access_key:
         logging.warning("AWS credentials not found.")
         return False
-    try:
+    else:
         sts = session.client('sts')
         sts.get_caller_identity()
         logging.info("AWS credentials are valid.")
         return True
-    except boto3.exceptions.Boto3Error as e:
-        logging.error(f"Error validating AWS credentials: {e}")
-        return False
-
 
 def make_record_factory(log_metadata):
     """
