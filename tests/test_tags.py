@@ -7,6 +7,7 @@ from io import StringIO
 import sys
 from botocore.exceptions import ClientError
 
+
 class TestLogUtils(TestCase):
     """
     Test the log utility functions
@@ -81,7 +82,7 @@ class TestLogUtils(TestCase):
             mouse_id="mouse123",
             session_name="session-abc"
         )
-        
+
         # This is internal code to fetch the log for the test.
         # We add a StreamHandler to capture the log output.
         logger = logging.getLogger()
@@ -94,9 +95,6 @@ class TestLogUtils(TestCase):
 
         stream_handler.flush()
 
-         # Restore sys.stdout
-        sys.stdout = sys.__stdout__
-
         # Check captured output
         captured_content = captured_output.getvalue()
 
@@ -104,8 +102,7 @@ class TestLogUtils(TestCase):
 
     @mock.patch('aind_log_utils.log.check_aws_credentials', return_value=True)
     @mock.patch('boto3.client')
-    def test_aws_setup_logging(self, mock_boto3_client, 
-                               mock_check_aws_credentials):
+    def test_aws_setup_logging(self, mock_boto3_client, mock_check_aws_credentials):
         """
         Test that the logger is correctly set up with mocked AWS environment
         """
