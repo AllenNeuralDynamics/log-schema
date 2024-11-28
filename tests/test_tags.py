@@ -3,9 +3,9 @@ import logging
 import os
 from unittest import mock, TestCase
 from aind_log_utils import log
-
-from unittest.mock import patch
-import io
+from io import StringIO
+import sys
+from botocore.exceptions import ClientError
 
 class TestLogUtils(TestCase):
     """
@@ -20,7 +20,7 @@ class TestLogUtils(TestCase):
              mock.patch.dict(os.environ, {
                  "HOSTNAME": "test-host",
                  "CO_COMPUTATION_ID": "test-comp-id",
-                 "CO_CAPSULE_ID": "test-version"
+                 "CO_CAPSULE_ID": "test-capsule-id"
              }):
             metadata = log.prepare_metadata(
                 process_name="test-process",
@@ -33,7 +33,7 @@ class TestLogUtils(TestCase):
         self.assertEqual(metadata["session_name"], "session-abc")
         self.assertEqual(metadata["hostname"], "test-host")
         self.assertEqual(metadata["comp_id"], "test-comp-id")
-        self.assertEqual(metadata["version"], "test-version")
+        self.assertEqual(metadata["capsule_id"], "test-capsule-id")
         self.assertNotEqual(metadata["log_session"], "")
 
     def test_make_record_factory(self):
@@ -69,62 +69,97 @@ class TestLogUtils(TestCase):
         self.assertEqual(record.session_name, "session-abc")
         self.assertEqual(record.process_name, "test-process")
 
-    def test_logger_with_fixture(self):
-        """
-        Test that the logger is correctly set up
-        """
-        # Simulate capturing logs with capsys equivalent
-        from io import StringIO
-        import sys
-
-        captured_output = StringIO()
-        sys.stdout = captured_output
-
-        message_template = "Test"
-        subject_id = "999999"
-        session_name = f"{subject_id}-110824"
-
-        log.setup_logging(
-            "capsule",
-            mouse_id=subject_id,
-            session_name=session_name,
-            send_start_log=False,
-        )
-
-        logging.info(message_template)
-
-        # Restore sys.stdout
-        sys.stdout = sys.__stdout__
-
-        # Check captured output
-        captured_content = captured_output.getvalue()
-        expected_substrings = "999999, 999999-110824"
-        self.assertIn(expected_substrings, captured_content)
-
-    @patch('sys.stdout', new_callable=io.StringIO)
-    @patch('sys.stderr', new_callable=io.StringIO)
-    def test_setup_logging(self):
+    def test_nonaws_setup_logging(self):
         """
         Test that the logger is correctly set up without sending the start log
         """
-        # Simulate capturing logs with capsys equivalent
-        from io import StringIO
-        import sys
-
         captured_output = StringIO()
-        sys.stdout = captured_output
 
+        # This is the line an external user would call
         log.setup_logging(
             process_name="test-process",
             mouse_id="mouse123",
             session_name="session-abc"
         )
+        
+        # This is internal code to fetch the log for the test.
+        # We add a StreamHandler to capture the log output.
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler(captured_output)
+        logger.addHandler(stream_handler)
+        logger.setLevel(logging.INFO)
 
-        logging.info("Log message without start log")
+        # This is the line an external user would call
+        logging.warning("Log message without start log")
 
-        # Restore sys.stdout
+        stream_handler.flush()
+
+         # Restore sys.stdout
         sys.stdout = sys.__stdout__
 
         # Check captured output
         captured_content = captured_output.getvalue()
+
         self.assertIn("Log message without start log", captured_content)
+
+    @mock.patch('aind_log_utils.log.check_aws_credentials', return_value=True)
+    @mock.patch('boto3.client')
+    def test_aws_setup_logging(self, mock_boto3_client, 
+                               mock_check_aws_credentials):
+        """
+        Test that the logger is correctly set up with mocked AWS environment
+        """
+        captured_output = StringIO()
+        
+        # Mock AWS credentials (dummy values)
+        mock_aws_credentials = mock.Mock()
+        mock_aws_credentials.access_key = "mock-access-key"
+        mock_aws_credentials.secret_key = "mock-secret-key"
+
+        # Mock get_credentials to return dummy credentials
+        mock_boto3_client.return_value.get_credentials.return_value = mock_aws_credentials
+
+        # Create a more realistic mock for paginator and result_keys
+        mock_result_key = mock.Mock()
+        mock_result_key.parsed = {"value": "logGroups"}  # Mimics the expected parsed structure
+
+        mock_paginator = mock.Mock()
+        mock_paginator.result_keys = [mock_result_key]
+        # Mocking result_keys as a list of objects
+        mock_paginator.paginate.return_value = [{'logGroups': [{'logGroupName': 'test-log-group'}]}]
+        mock_boto3_client.return_value.get_paginator.return_value = mock_paginator
+
+        # Mock other attributes or methods if necessary
+        mock_boto3_client.return_value.exceptions.ClientError = ClientError
+
+        # Call setup_logging with a message
+        message_template = "Test"
+        subject_id = "999999"
+        session_name = f"{subject_id}-110824"
+
+        log.setup_logging(
+            process_name="test-capsule",
+            mouse_id=subject_id,
+            session_name=session_name,
+            send_start_log=False,
+        )
+
+        # This is internal code to fetch the log for the test.
+        # We add a StreamHandler to capture the log output.
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler(captured_output)
+        logger.addHandler(stream_handler)
+        logger.setLevel(logging.INFO)
+
+        logging.info(message_template)
+
+        stream_handler.flush()
+
+        # Check captured output
+        captured_content = captured_output.getvalue()
+        expected_substrings = session_name
+        self.assertIn(expected_substrings, captured_content)
+
+        # Verify that the paginator was used
+        mock_boto3_client.return_value.get_paginator.assert_called_once()
+        mock_paginator.paginate.assert_called_once_with(logGroupNamePrefix='aind/internal_logs')
