@@ -14,6 +14,23 @@ from hashlib import md5
 import boto3
 import watchtower
 
+
+def check_aws_credentials():
+    """
+    This function checks if the AWS credentials are valid.
+    :return: True if the credentials are valid, False otherwise
+    """
+    session = boto3.Session()
+    credentials = session.get_credentials()
+    if not credentials or not credentials.access_key:
+        logging.warning("AWS credentials not found.")
+        return False
+    sts = session.client('sts')
+    sts.get_caller_identity()
+    logging.info("AWS credentials are valid.")
+    return True
+
+
 def make_record_factory(log_metadata):
     """
     This function creates a log record factory that adds metadata to the log
@@ -77,7 +94,7 @@ def prepare_metadata(process_name, mouse_id, session_name):
                                       encode("utf-8")).hexdigest()[:7]
     log_metadata['hostname'] = os.getenv("HOSTNAME", "undefined")
     log_metadata['comp_id'] = os.getenv("CO_COMPUTATION_ID", "undefined")
-    log_metadata['version'] = os.getenv("CO_CAPSULE_ID", "undefined")
+    log_metadata['capsule_id'] = os.getenv("CO_CAPSULE_ID", "undefined")
     log_metadata['process_name'] = process_name
 
     return log_metadata
@@ -100,52 +117,74 @@ def setup_logging(
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
     """
-    boto3_logs_client = boto3.client("logs", region_name="us-west-2")
-    log_metadata = prepare_metadata(process_name, mouse_id, session_name)
 
-    log_config = {
-        'version': 1,
-        'disable_existing_loggers': True,
-        'root': {
-            'level': 'INFO',
-            'handlers': ['console', 'watchtower'],
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
+    if check_aws_credentials():
+        # If that passses, we expect to be on Code Ocean
+        boto3_logs_client = boto3.client("logs", region_name="us-west-2")
+        logging.info("Connected to boto3. Logging to console and cloudwatch")
+
+        log_metadata = prepare_metadata(process_name, mouse_id, session_name)
+
+        log_config = {
+            'version': 1,
+            'disable_existing_loggers': True,
+            'root': {
+                'level': 'INFO',
+                'handlers': ['console', 'watchtower'],
             },
-            'watchtower': {
-                'class': 'watchtower.CloudWatchLogHandler',
-                'boto3_client': boto3_logs_client,
-                'log_group_name': 'aind/internal_logs',
-                'log_stream_name': log_metadata['version'],
-                'level': 'INFO'
-            }
-        },
-    }
+            'handlers': {
+                'console': {
+                    'class': 'logging.StreamHandler',
+                },
+                'watchtower': {
+                    'class': 'watchtower.CloudWatchLogHandler',
+                    'boto3_client': boto3_logs_client,
+                    'log_group_name': 'aind/internal_logs',
+                    'log_stream_name': log_metadata['capsule_id'],
+                    'level': 'INFO'
+                }
+            },
+        }
 
-    logging.setLogRecordFactory(make_record_factory(log_metadata))
-    logging.config.dictConfig(log_config)
-    logger = logging.getLogger()
-    logger.handlers[1].formatter.add_log_record_attrs = ['levelname',
-                                                         'filename',
-                                                         'mouse_id',
-                                                         'process',
-                                                         'thread',
-                                                         'lineno',
-                                                         'message',
-                                                         'hostname',
-                                                         'comp_id',
-                                                         'version',
-                                                         'log_session',
-                                                         'user_name',
-                                                         'session_name',
-                                                         'process_name',
-                                                         'exc_info',
-                                                         'exc_text'
-                                                         ]
-    
+        logging.setLogRecordFactory(make_record_factory(log_metadata))
+        logging.config.dictConfig(log_config)
+        logger = logging.getLogger()
+        logger.handlers[1].formatter.add_log_record_attrs = ['levelname',
+                                                            'filename',
+                                                            'mouse_id',
+                                                            'process',
+                                                            'thread',
+                                                            'lineno',
+                                                            'message',
+                                                            'hostname',
+                                                            'comp_id',
+                                                            'version',
+                                                            'log_session',
+                                                            'user_name',
+                                                            'session_name',
+                                                            'process_name',
+                                                            'exc_info',
+                                                            'exc_text'
+                                                            ]
+    else:    
+        log_config = {
+            'version': 1,
+            'disable_existing_loggers': True,
+            'root': {
+                'level': 'INFO',
+                'handlers': ['console'],
+            },
+            'handlers': {
+                'console': {
+                    'class': 'logging.StreamHandler',
+                }
+            },
+        }
+        logging.config.dictConfig(log_config)
+
+        # we raise a warning and return
+        logging.warning("Could not connect to boto3. Logging to console only")
+
     if send_start_log:
         logging.info("Starting")
         atexit.register(lambda: logging.info("Stopping"))
-

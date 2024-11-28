@@ -14,7 +14,7 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-    'pyyaml', 'boto3', 'watchtower'
+    'boto3', 'watchtower'
 ]
 
 [project.optional-dependencies]
