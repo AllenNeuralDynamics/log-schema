@@ -167,7 +167,6 @@ def setup_logging(
                                                             'exc_text'
                                                             ]
     else:
-
         log_config = {
             'version': 1,
             'disable_existing_loggers': True,
