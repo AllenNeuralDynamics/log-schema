@@ -30,6 +30,7 @@ def check_aws_credentials():
         logging.info("AWS credentials are valid.")
         return True
 
+
 def make_record_factory(log_metadata):
     """
     This function creates a log record factory that adds metadata to the log
