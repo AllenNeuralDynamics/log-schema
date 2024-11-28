@@ -159,3 +159,30 @@ class TestLogUtils(TestCase):
         # Verify that the paginator was used
         mock_boto3_client.return_value.get_paginator.assert_called_once()
         mock_paginator.paginate.assert_called_once_with(logGroupNamePrefix='aind/internal_logs')
+
+    @mock.patch('boto3.Session')
+    def test_check_aws_credentials(self, mock_session):
+        """
+        Test the check_aws_credentials function.
+        """
+        # Mock a session with valid credentials
+        mock_credentials = mock.Mock()
+        mock_credentials.access_key = "valid-access-key"
+        mock_credentials.secret_key = "valid-secret-key"
+        mock_credentials.token = "valid-token"
+
+        mock_session_instance = mock.Mock()
+        mock_session_instance.get_credentials.return_value = mock_credentials
+        mock_session_instance.client.return_value.get_caller_identity.return_value = {
+            "UserId": "test-user",
+            "Account": "test-account",
+            "Arn": "arn:aws:iam::test-account:user/test-user"
+        }
+        mock_session.return_value = mock_session_instance
+
+        # Test with valid credentials
+        self.assertTrue(log.check_aws_credentials())
+
+        # Mock a session with missing credentials
+        mock_session_instance.get_credentials.return_value = None
+        self.assertFalse(log.check_aws_credentials())
