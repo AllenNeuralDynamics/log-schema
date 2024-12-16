@@ -12,7 +12,7 @@
 Typical programmatic usage of this library looks like this:
 ```python
 import logging
-from aind_log_utils import setup_logging
+from aind_log_utils.log import setup_logging
 
 setup_logging("my_process_name", mouse_id="mouse1", 
                         session_name="session1")
