@@ -69,6 +69,14 @@ def make_record_factory(log_metadata):
         record.subject_id = log_metadata.get('subject_id', 'undefined')
         record.asset_name = log_metadata.get('asset_name', 'undefined')
         record.process_name = log_metadata.get('process_name', 'undefined')
+        record.CO_MEMORY = os.getenv('CO_MEMORY', 'undefined')
+        record.CO_CPUS = os.getenv('CO_CPUS', 'undefined')
+        record.AWS_BATCH_JOB_ID = os.getenv('AWS_BATCH_JOB_ID', 'undefined')
+        record.AWS_BATCH_CE_NAME = os.getenv('AWS_BATCH_CE_NAME', 'undefined')
+        record.AWS_BATCH_JQ_NAME = os.getenv('AWS_BATCH_JQ_NAME', 'undefined')
+        record.AWS_METADATA_SERVICE_NUM_ATTEMPTS = os.getenv('AWS_METADATA_SERVICE_NUM_ATTEMPTS', 'undefined')
+        record.AWS_BATCH_JOB_ATTEMPT = os.getenv('AWS_BATCH_JOB_ATTEMPT', 'undefined')
+        record.AWS_MAX_ATTEMPTS = os.getenv('AWS_MAX_ATTEMPTS', 'undefined')
 
         return record
     return record_factory
