@@ -101,6 +101,15 @@ def prepare_metadata(process_name, subject_id, asset_name):
     log_metadata['capsule_id'] = os.getenv("CO_CAPSULE_ID", "undefined")
     log_metadata['process_name'] = process_name
 
+    log_metadata['CO_MEMORY'] = os.getenv("CO_MEMORY", "undefined")
+    log_metadata['CO_CPUS'] = os.getenv("CO_CPUS", "undefined")
+    log_metadata['AWS_BATCH_JOB_ID'] = os.getenv("AWS_BATCH_JOB_ID", "undefined")
+    log_metadata['AWS_BATCH_CE_NAME'] = os.getenv("AWS_BATCH_CE_NAME", "undefined")
+    log_metadata['AWS_BATCH_JQ_NAME'] = os.getenv("AWS_BATCH_JQ_NAME", "undefined")
+    log_metadata['AWS_METADATA_SERVICE_NUM_ATTEMPTS'] = os.getenv("AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined")
+    log_metadata['AWS_BATCH_JOB_ATTEMPT'] = os.getenv("AWS_BATCH_JOB_ATTEMPT", "undefined")
+    log_metadata['AWS_MAX_ATTEMPTS'] = os.getenv("AWS_MAX_ATTEMPTS", "undefined")
+
     return log_metadata
 
 
@@ -180,8 +189,12 @@ def setup_logging(
         logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'subject_id', 'process', 'thread',
                                                              'lineno', 'message', 'hostname', 'comp_id', 'version',
                                                              'log_session', 'user_name', 'asset_name', 'process_name',
-                                                             'exc_info', 'exc_text'
-                                                             ]
+                                                             'exc_info', 'exc_text',
+                                                             'CO_MEMORY', 'CO_CPUS', 'AWS_BATCH_JOB_ID',
+                                                             'AWS_BATCH_CE_NAME', 'AWS_BATCH_JQ_NAME',
+                                                             'AWS_METADATA_SERVICE_NUM_ATTEMPTS',
+                                                             'AWS_BATCH_JOB_ATTEMPT', 'AWS_MAX_ATTEMPTS'
+                                                        ]
     else:
         log_config = {
             'version': 1,
