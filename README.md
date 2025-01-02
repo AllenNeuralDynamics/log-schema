@@ -14,11 +14,14 @@ Typical programmatic usage of this library looks like this:
 import logging
 from aind_log_utils.log import setup_logging
 
-setup_logging("my_process_name", mouse_id="mouse1", 
-                        session_name="session1")
+setup_logging("my_process_name", subject_id="subject1", 
+                        asset_name="asset1")
 
 logging.info("my log message")
 ```
+
+asset_name should be in the form "<modality>_<mouse_id>_<date>".
+for example: behavior_746346_2024-12-18_12-48-05
 
 ## Installation
 To use the software, in the root directory, run

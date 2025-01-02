@@ -109,6 +109,7 @@ def setup_logging(
     subject_id: str = 'undefined',
     asset_name: str = 'undefined',
     send_start_log: bool = True,
+    disable_existing_loggers: bool = True,
     **kwargs
 ):
     """
@@ -121,6 +122,7 @@ def setup_logging(
     :param asset_name: The asset name to track
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
+    :param disable_existing_loggers: Whether to disable existing loggers
     """
     
     # Map old parameter names to new ones for backwards compatibility
@@ -152,7 +154,7 @@ def setup_logging(
 
         log_config = {
             'version': 1,
-            'disable_existing_loggers': True,
+            'disable_existing_loggers': disable_existing_loggers,
             'root': {
                 'level': 'INFO',
                 'handlers': ['console', 'watchtower'],
@@ -160,6 +162,7 @@ def setup_logging(
             'handlers': {
                 'console': {
                     'class': 'logging.StreamHandler',
+                    'stream': 'ext://sys.stdout',  # Ensure logs go to the expected output stream
                 },
                 'watchtower': {
                     'class': 'watchtower.CloudWatchLogHandler',
