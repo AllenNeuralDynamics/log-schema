@@ -12,6 +12,7 @@ import sys
 import traceback
 from hashlib import md5
 import boto3
+import warnings
 
 
 def check_aws_credentials():
@@ -62,20 +63,20 @@ def make_record_factory(log_metadata):
         record.version = log_metadata.get('capsule_id', 'undefined')
         record.log_session = log_metadata.get('log_session', 'undefined')
         record.user_name = log_metadata.get('user_name', 'undefined')
-        record.mouse_id = log_metadata.get('mouse_id', 'undefined')
-        record.session_name = log_metadata.get('session_name', 'undefined')
+        record.subject_id = log_metadata.get('subject_id', 'undefined')
+        record.asset_name = log_metadata.get('asset_name', 'undefined')
         record.process_name = log_metadata.get('process_name', 'undefined')
 
         return record
     return record_factory
 
 
-def prepare_metadata(process_name, mouse_id, session_name):
+def prepare_metadata(process_name, subject_id, asset_name):
     """
     This function prepares the metadata that is attached to all logs.
     :param process_name: The name of the process to track
-    :param mouse_id: The mouse ID to track
-    :param session_name: The session name to track
+    :param subject_id: The subject ID to track
+    :param asset_name: The asset name to track
     :return: A dictionary with the metadata to add to the log records
     """
 
@@ -84,8 +85,8 @@ def prepare_metadata(process_name, mouse_id, session_name):
     # First metadata shared across all AIND processes. Those are the most
     # important ones.
     log_metadata['process_name'] = process_name
-    log_metadata['mouse_id'] = mouse_id
-    log_metadata['session_name'] = session_name
+    log_metadata['subject_id'] = subject_id
+    log_metadata['asset_name'] = asset_name
 
     # To ensure that we can track logs from a single session
     session_parts = [str(datetime.datetime.now()),
@@ -102,9 +103,10 @@ def prepare_metadata(process_name, mouse_id, session_name):
 
 def setup_logging(
     process_name: str,
-    mouse_id: str = 'undefined',
-    session_name: str = 'undefined',
+    subject_id: str = 'undefined',
+    asset_name: str = 'undefined',
     send_start_log: bool = True,
+    **kwargs
 ):
     """
     Logging setup consists of
@@ -112,18 +114,35 @@ def setup_logging(
       2.  injecting additional data into the log records via the log factory
       3.  sending a start log and registering to send a stop log
     :param process_name: The name of the process to track
-    :param mouse_id: The mouse ID to track
-    :param session_name: The session name to track
+    :param subject_id: The subject ID to track
+    :param asset_name: The asset name to track
     :param send_start_log: Whether to send a log to the webserver
     (not desirable for libraries) [default = True]
     """
+    
+    # Map old parameter names to new ones for backwards compatibility
+    old_to_new = {
+        "mouse_id": "subject_id",
+        "session_name": "asset_name",
+    }
+
+     # Check for old parameter names in kwargs
+    for old_name, new_name in old_to_new.items():
+        if old_name in kwargs:
+            warnings.warn(
+                f"'{old_name}' is deprecated and will be removed in future versions. "
+                f"Use '{new_name}' instead.",
+                DeprecationWarning,
+            )
+            # Use the old parameter value if the new one is not set
+            locals()[new_name] = kwargs[old_name]
 
     if check_aws_credentials():
         # If that passses, we expect to be on Code Ocean
         boto3_logs_client = boto3.client("logs", region_name="us-west-2")
         logging.info("Connected to boto3. Logging to console and cloudwatch")
 
-        log_metadata = prepare_metadata(process_name, mouse_id, session_name)
+        log_metadata = prepare_metadata(process_name, subject_id, asset_name)
 
         log_config = {
             'version': 1,
@@ -149,9 +168,9 @@ def setup_logging(
         logging.setLogRecordFactory(make_record_factory(log_metadata))
         logging.config.dictConfig(log_config)
         logger = logging.getLogger()
-        logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'mouse_id', 'process', 'thread',
+        logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'subject_id', 'process', 'thread',
                                                              'lineno', 'message', 'hostname', 'comp_id', 'version',
-                                                             'log_session', 'user_name', 'session_name', 'process_name',
+                                                             'log_session', 'user_name', 'asset_name', 'process_name',
                                                              'exc_info', 'exc_text'
                                                              ]
     else:
