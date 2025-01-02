@@ -243,3 +243,67 @@ class TestLogUtils(TestCase):
         # Mock a session with missing credentials
         mock_session_instance.get_credentials.return_value = None
         self.assertFalse(log.check_aws_credentials())
+
+    @mock.patch('aind_log_utils.log.check_aws_credentials', return_value=True)
+    @mock.patch('boto3.client')
+    def test_aws_error_logging(self, mock_boto3_client, mock_check_aws_credentials):
+        """
+        Test that the logger is appending exception stacks to the log.
+        """
+        captured_output = StringIO()
+
+        # Mock AWS credentials (dummy values)
+        mock_aws_credentials = mock.Mock()
+        mock_aws_credentials.access_key = "mock-access-key"
+        mock_aws_credentials.secret_key = "mock-secret-key"
+
+        # Mock get_credentials to return dummy credentials
+        mock_boto3_client.return_value.get_credentials.return_value = mock_aws_credentials
+
+        # Create a more realistic mock for paginator and result_keys
+        mock_result_key = mock.Mock()
+        mock_result_key.parsed = {"value": "logGroups"}  # Mimics the expected parsed structure
+
+        mock_paginator = mock.Mock()
+        mock_paginator.result_keys = [mock_result_key]
+        # Mocking result_keys as a list of objects
+        mock_paginator.paginate.return_value = [{'logGroups': [{'logGroupName': 'test-log-group'}]}]
+        mock_boto3_client.return_value.get_paginator.return_value = mock_paginator
+
+        # Mock other attributes or methods if necessary
+        mock_boto3_client.return_value.exceptions.ClientError = ClientError
+
+        # Call setup_logging with a message
+        message_template = "Test exception"
+        subject_id = "999999"
+        asset_name = f"{subject_id}-110824"
+
+        log.setup_logging(
+            process_name="test-capsule",
+            subject_id=subject_id,
+            asset_name=asset_name,
+            send_start_log=False,
+        )
+
+        # This is internal code to fetch the log for the test.
+        # We add a StreamHandler to capture the log output.
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler(captured_output)
+        logger.addHandler(stream_handler)
+        logger.setLevel(logging.INFO)
+
+        # We raise an exception
+        try:
+            raise ValueError("Test exception")
+        except ValueError:
+            logging.exception("An exception occurred")
+
+        stream_handler.flush()
+
+        # Check captured output
+        captured_content = captured_output.getvalue()
+        self.assertIn(message_template, captured_content)
+
+        # Verify that the paginator was used
+        mock_boto3_client.return_value.get_paginator.assert_called_once()
+        mock_paginator.paginate.assert_called_once_with(logGroupNamePrefix='aind/internal_logs')

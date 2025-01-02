@@ -55,8 +55,11 @@ def make_record_factory(log_metadata):
         record = log_record_factory(*args, **kwargs)
         # We add the items that we need to track across AIND
 
-        record.exc_info = sys.exc_info()
-        record.exc_text = traceback.format_exc()
+        # Check if an exception is being handled before setting exc_info and exc_text
+        exc_info = sys.exc_info()
+        if any(exc_info):
+            record.exc_info = exc_info
+            record.exc_text = traceback.format_exc()
 
         record.hostname = log_metadata.get('hostname', 'undefined')
         record.comp_id = log_metadata.get('comp_id', 'undefined')
@@ -134,8 +137,11 @@ def setup_logging(
                 f"Use '{new_name}' instead.",
                 DeprecationWarning,
             )
-            # Use the old parameter value if the new one is not set
-            locals()[new_name] = kwargs[old_name]
+            # Use the old parameter value to set the new parameter
+            if new_name == "subject_id":
+                subject_id = kwargs[old_name]
+            elif new_name == "asset_name":
+                asset_name = kwargs[old_name]
 
     if check_aws_credentials():
         # If that passses, we expect to be on Code Ocean
