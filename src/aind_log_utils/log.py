@@ -1,6 +1,7 @@
 """ This file is the main file for the aind-log-utils package. It contains the
 functions that are meant to be used by the users of the package.
 """
+
 import atexit
 import datetime
 import logging
@@ -10,9 +11,10 @@ import os
 import platform
 import sys
 import traceback
-from hashlib import md5
-import boto3
 import warnings
+from hashlib import md5
+
+import boto3
 
 
 def check_aws_credentials():
@@ -26,7 +28,7 @@ def check_aws_credentials():
         logging.warning("AWS credentials not found.")
         return False
     else:
-        sts = session.client('sts')
+        sts = session.client("sts")
         sts.get_caller_identity()
         logging.info("AWS credentials are valid.")
         return True
@@ -41,9 +43,7 @@ def make_record_factory(log_metadata):
     :return: A log record factory that adds the metadata to the log records
     """
     # We start with the base factory
-    log_record_factory = (
-        logging.getLogRecordFactory()
-    )
+    log_record_factory = logging.getLogRecordFactory()
 
     def record_factory(*args, **kwargs):
         """
@@ -61,24 +61,29 @@ def make_record_factory(log_metadata):
             record.exc_info = exc_info
             record.exc_text = traceback.format_exc()
 
-        record.hostname = log_metadata.get('hostname', 'undefined')
-        record.comp_id = log_metadata.get('comp_id', 'undefined')
-        record.version = log_metadata.get('capsule_id', 'undefined')
-        record.log_session = log_metadata.get('log_session', 'undefined')
-        record.user_name = log_metadata.get('user_name', 'undefined')
-        record.subject_id = log_metadata.get('subject_id', 'undefined')
-        record.asset_name = log_metadata.get('asset_name', 'undefined')
-        record.process_name = log_metadata.get('process_name', 'undefined')
-        record.CO_MEMORY = os.getenv('CO_MEMORY', 'undefined')
-        record.CO_CPUS = os.getenv('CO_CPUS', 'undefined')
-        record.AWS_BATCH_JOB_ID = os.getenv('AWS_BATCH_JOB_ID', 'undefined')
-        record.AWS_BATCH_CE_NAME = os.getenv('AWS_BATCH_CE_NAME', 'undefined')
-        record.AWS_BATCH_JQ_NAME = os.getenv('AWS_BATCH_JQ_NAME', 'undefined')
-        record.AWS_METADATA_SERVICE_NUM_ATTEMPTS = os.getenv('AWS_METADATA_SERVICE_NUM_ATTEMPTS', 'undefined')
-        record.AWS_BATCH_JOB_ATTEMPT = os.getenv('AWS_BATCH_JOB_ATTEMPT', 'undefined')
-        record.AWS_MAX_ATTEMPTS = os.getenv('AWS_MAX_ATTEMPTS', 'undefined')
+        record.hostname = log_metadata.get("hostname", "undefined")
+        record.comp_id = log_metadata.get("comp_id", "undefined")
+        record.version = log_metadata.get("capsule_id", "undefined")
+        record.log_session = log_metadata.get("log_session", "undefined")
+        record.user_name = log_metadata.get("user_name", "undefined")
+        record.subject_id = log_metadata.get("subject_id", "undefined")
+        record.asset_name = log_metadata.get("asset_name", "undefined")
+        record.process_name = log_metadata.get("process_name", "undefined")
+        record.CO_MEMORY = os.getenv("CO_MEMORY", "undefined")
+        record.CO_CPUS = os.getenv("CO_CPUS", "undefined")
+        record.AWS_BATCH_JOB_ID = os.getenv("AWS_BATCH_JOB_ID", "undefined")
+        record.AWS_BATCH_CE_NAME = os.getenv("AWS_BATCH_CE_NAME", "undefined")
+        record.AWS_BATCH_JQ_NAME = os.getenv("AWS_BATCH_JQ_NAME", "undefined")
+        record.AWS_METADATA_SERVICE_NUM_ATTEMPTS = os.getenv(
+            "AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined"
+        )
+        record.AWS_BATCH_JOB_ATTEMPT = os.getenv(
+            "AWS_BATCH_JOB_ATTEMPT", "undefined"
+        )
+        record.AWS_MAX_ATTEMPTS = os.getenv("AWS_MAX_ATTEMPTS", "undefined")
 
         return record
+
     return record_factory
 
 
@@ -95,39 +100,55 @@ def prepare_metadata(process_name, subject_id, asset_name):
 
     # First metadata shared across all AIND processes. Those are the most
     # important ones.
-    log_metadata['process_name'] = process_name
-    log_metadata['subject_id'] = subject_id
-    log_metadata['asset_name'] = asset_name
+    log_metadata["process_name"] = process_name
+    log_metadata["subject_id"] = subject_id
+    log_metadata["asset_name"] = asset_name
 
     # To ensure that we can track logs from a single session
-    session_parts = [str(datetime.datetime.now()),
-                     platform.node(), str(os.getpid())]
-    log_metadata['log_session'] = md5((''.join(session_parts)).
-                                      encode("utf-8")).hexdigest()[:7]
-    log_metadata['hostname'] = os.getenv("HOSTNAME", "undefined")
-    log_metadata['comp_id'] = os.getenv("CO_COMPUTATION_ID", "undefined")
-    log_metadata['capsule_id'] = os.getenv("CO_CAPSULE_ID", "undefined")
-    log_metadata['process_name'] = process_name
+    session_parts = [
+        str(datetime.datetime.now()),
+        platform.node(),
+        str(os.getpid()),
+    ]
+    log_metadata["log_session"] = md5(
+        ("".join(session_parts)).encode("utf-8")
+    ).hexdigest()[:7]
+    log_metadata["hostname"] = os.getenv("HOSTNAME", "undefined")
+    log_metadata["comp_id"] = os.getenv("CO_COMPUTATION_ID", "undefined")
+    log_metadata["capsule_id"] = os.getenv("CO_CAPSULE_ID", "undefined")
+    log_metadata["process_name"] = process_name
 
-    log_metadata['CO_MEMORY'] = os.getenv("CO_MEMORY", "undefined")
-    log_metadata['CO_CPUS'] = os.getenv("CO_CPUS", "undefined")
-    log_metadata['AWS_BATCH_JOB_ID'] = os.getenv("AWS_BATCH_JOB_ID", "undefined")
-    log_metadata['AWS_BATCH_CE_NAME'] = os.getenv("AWS_BATCH_CE_NAME", "undefined")
-    log_metadata['AWS_BATCH_JQ_NAME'] = os.getenv("AWS_BATCH_JQ_NAME", "undefined")
-    log_metadata['AWS_METADATA_SERVICE_NUM_ATTEMPTS'] = os.getenv("AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined")
-    log_metadata['AWS_BATCH_JOB_ATTEMPT'] = os.getenv("AWS_BATCH_JOB_ATTEMPT", "undefined")
-    log_metadata['AWS_MAX_ATTEMPTS'] = os.getenv("AWS_MAX_ATTEMPTS", "undefined")
+    log_metadata["CO_MEMORY"] = os.getenv("CO_MEMORY", "undefined")
+    log_metadata["CO_CPUS"] = os.getenv("CO_CPUS", "undefined")
+    log_metadata["AWS_BATCH_JOB_ID"] = os.getenv(
+        "AWS_BATCH_JOB_ID", "undefined"
+    )
+    log_metadata["AWS_BATCH_CE_NAME"] = os.getenv(
+        "AWS_BATCH_CE_NAME", "undefined"
+    )
+    log_metadata["AWS_BATCH_JQ_NAME"] = os.getenv(
+        "AWS_BATCH_JQ_NAME", "undefined"
+    )
+    log_metadata["AWS_METADATA_SERVICE_NUM_ATTEMPTS"] = os.getenv(
+        "AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined"
+    )
+    log_metadata["AWS_BATCH_JOB_ATTEMPT"] = os.getenv(
+        "AWS_BATCH_JOB_ATTEMPT", "undefined"
+    )
+    log_metadata["AWS_MAX_ATTEMPTS"] = os.getenv(
+        "AWS_MAX_ATTEMPTS", "undefined"
+    )
 
     return log_metadata
 
 
 def setup_logging(
     process_name: str,
-    subject_id: str = 'undefined',
-    asset_name: str = 'undefined',
+    subject_id: str = "undefined",
+    asset_name: str = "undefined",
     send_start_log: bool = True,
     disable_existing_loggers: bool = True,
-    **kwargs
+    **kwargs,
 ):
     """
     Logging setup consists of
@@ -141,14 +162,14 @@ def setup_logging(
     (not desirable for libraries) [default = True]
     :param disable_existing_loggers: Whether to disable existing loggers
     """
-    
+
     # Map old parameter names to new ones for backwards compatibility
     old_to_new = {
         "mouse_id": "subject_id",
         "session_name": "asset_name",
     }
 
-     # Check for old parameter names in kwargs
+    # Check for old parameter names in kwargs
     for old_name, new_name in old_to_new.items():
         if old_name in kwargs:
             warnings.warn(
@@ -170,50 +191,67 @@ def setup_logging(
         log_metadata = prepare_metadata(process_name, subject_id, asset_name)
 
         log_config = {
-            'version': 1,
-            'disable_existing_loggers': disable_existing_loggers,
-            'root': {
-                'level': 'INFO',
-                'handlers': ['console', 'watchtower'],
+            "version": 1,
+            "disable_existing_loggers": disable_existing_loggers,
+            "root": {
+                "level": "INFO",
+                "handlers": ["console", "watchtower"],
             },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                    'stream': 'ext://sys.stdout',  # Ensure logs go to the expected output stream
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout",  # Ensure logs go to the expected output stream
                 },
-                'watchtower': {
-                    'class': 'watchtower.CloudWatchLogHandler',
-                    'boto3_client': boto3_logs_client,
-                    'log_group_name': 'aind/internal_logs',
-                    'log_stream_name': log_metadata['capsule_id'],
-                    'level': 'INFO'
-                }
+                "watchtower": {
+                    "class": "watchtower.CloudWatchLogHandler",
+                    "boto3_client": boto3_logs_client,
+                    "log_group_name": "aind/internal_logs",
+                    "log_stream_name": log_metadata["capsule_id"],
+                    "level": "INFO",
+                },
             },
         }
 
         logging.setLogRecordFactory(make_record_factory(log_metadata))
         logging.config.dictConfig(log_config)
         logger = logging.getLogger()
-        logger.handlers[1].formatter.add_log_record_attrs = ['levelname', 'filename', 'subject_id', 'process', 'thread',
-                                                             'lineno', 'message', 'hostname', 'comp_id', 'version',
-                                                             'log_session', 'user_name', 'asset_name', 'process_name',
-                                                             'exc_info', 'exc_text',
-                                                             'CO_MEMORY', 'CO_CPUS', 'AWS_BATCH_JOB_ID',
-                                                             'AWS_BATCH_CE_NAME', 'AWS_BATCH_JQ_NAME',
-                                                             'AWS_METADATA_SERVICE_NUM_ATTEMPTS',
-                                                             'AWS_BATCH_JOB_ATTEMPT', 'AWS_MAX_ATTEMPTS'
-                                                        ]
+        logger.handlers[1].formatter.add_log_record_attrs = [
+            "levelname",
+            "filename",
+            "subject_id",
+            "process",
+            "thread",
+            "lineno",
+            "message",
+            "hostname",
+            "comp_id",
+            "version",
+            "log_session",
+            "user_name",
+            "asset_name",
+            "process_name",
+            "exc_info",
+            "exc_text",
+            "CO_MEMORY",
+            "CO_CPUS",
+            "AWS_BATCH_JOB_ID",
+            "AWS_BATCH_CE_NAME",
+            "AWS_BATCH_JQ_NAME",
+            "AWS_METADATA_SERVICE_NUM_ATTEMPTS",
+            "AWS_BATCH_JOB_ATTEMPT",
+            "AWS_MAX_ATTEMPTS",
+        ]
     else:
         log_config = {
-            'version': 1,
-            'disable_existing_loggers': True,
-            'root': {
-                'level': 'INFO',
-                'handlers': ['console'],
+            "version": 1,
+            "disable_existing_loggers": True,
+            "root": {
+                "level": "INFO",
+                "handlers": ["console"],
             },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
                 }
             },
         }
