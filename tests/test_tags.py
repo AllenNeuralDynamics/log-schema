@@ -24,13 +24,13 @@ class TestLogUtils(TestCase):
              }):
             metadata = log.prepare_metadata(
                 process_name="test-process",
-                mouse_id="mouse123",
-                session_name="session-abc"
+                subject_id="subject123",
+                asset_name="asset-abc"
             )
 
         self.assertEqual(metadata["process_name"], "test-process")
-        self.assertEqual(metadata["mouse_id"], "mouse123")
-        self.assertEqual(metadata["session_name"], "session-abc")
+        self.assertEqual(metadata["subject_id"], "subject123")
+        self.assertEqual(metadata["asset_name"], "asset-abc")
         self.assertEqual(metadata["hostname"], "test-host")
         self.assertEqual(metadata["comp_id"], "test-comp-id")
         self.assertEqual(metadata["capsule_id"], "test-capsule-id")
@@ -46,8 +46,8 @@ class TestLogUtils(TestCase):
             "capsule_id": "test-cap-id",
             "log_session": "test-session",
             "user_name": "test-user",
-            "mouse_id": "mouse123",
-            "session_name": "session-abc",
+            "subject_id": "subject123",
+            "asset_name": "asset-abc",
             "process_name": "test-process",
         }
 
@@ -65,8 +65,8 @@ class TestLogUtils(TestCase):
         self.assertEqual(record.comp_id, "test-comp-id")
         self.assertEqual(record.version, "test-cap-id")
         self.assertEqual(record.log_session, "test-session")
-        self.assertEqual(record.mouse_id, "mouse123")
-        self.assertEqual(record.session_name, "session-abc")
+        self.assertEqual(record.subject_id, "subject123")
+        self.assertEqual(record.asset_name, "asset-abc")
         self.assertEqual(record.process_name, "test-process")
 
     def test_nonaws_setup_logging(self):
@@ -78,8 +78,8 @@ class TestLogUtils(TestCase):
         # This is the line an external user would call
         log.setup_logging(
             process_name="test-process",
-            mouse_id="mouse123",
-            session_name="session-abc"
+            subject_id="subject123",
+            asset_name="asset-abc"
         )
 
         # This is internal code to fetch the log for the test.
@@ -131,12 +131,12 @@ class TestLogUtils(TestCase):
         # Call setup_logging with a message
         message_template = "Test"
         subject_id = "999999"
-        session_name = f"{subject_id}-110824"
+        asset_name = f"{subject_id}-110824"
 
         log.setup_logging(
             process_name="test-capsule",
-            mouse_id=subject_id,
-            session_name=session_name,
+            subject_id=subject_id,
+            asset_name=asset_name,
             send_start_log=False,
         )
 
@@ -153,12 +153,69 @@ class TestLogUtils(TestCase):
 
         # Check captured output
         captured_content = captured_output.getvalue()
-        expected_substrings = session_name
-        self.assertIn(expected_substrings, captured_content)
+        self.assertIn(asset_name, captured_content)
 
         # Verify that the paginator was used
         mock_boto3_client.return_value.get_paginator.assert_called_once()
         mock_paginator.paginate.assert_called_once_with(logGroupNamePrefix='aind/internal_logs')
+
+
+    @mock.patch('aind_log_utils.log.check_aws_credentials', return_value=True)
+    @mock.patch('boto3.client')
+    def test_aws_old_parameter_setup_logging(self, mock_boto3_client, mock_check_aws_credentials):
+        """
+        Test that the logger is correctly set up with old parameters names.
+        This is for backward compatibility.
+        """
+        captured_output = StringIO()
+        
+        # Mock AWS credentials (dummy values)
+        mock_aws_credentials = mock.Mock()
+        mock_aws_credentials.access_key = "mock-access-key"
+        mock_aws_credentials.secret_key = "mock-secret-key"
+
+        # Mock get_credentials to return dummy credentials
+        mock_boto3_client.return_value.get_credentials.return_value = mock_aws_credentials
+
+        # Create a more realistic mock for paginator and result_keys
+        mock_result_key = mock.Mock()
+        mock_result_key.parsed = {"value": "logGroups"}  # Mimics the expected parsed structure
+
+        mock_paginator = mock.Mock()
+        mock_paginator.result_keys = [mock_result_key]
+        # Mocking result_keys as a list of objects
+        mock_paginator.paginate.return_value = [{'logGroups': [{'logGroupName': 'test-log-group'}]}]
+        mock_boto3_client.return_value.get_paginator.return_value = mock_paginator
+
+        # Mock other attributes or methods if necessary
+        mock_boto3_client.return_value.exceptions.ClientError = ClientError
+        
+        # Call setup_logging with a message
+        message_template = "Test"
+        mouse_id = "999999"
+        session_name = f"{mouse_id}-110824"
+        
+        # This is the line an external user would call
+        log.setup_logging(
+            process_name="test-process",
+            mouse_id=mouse_id,
+            session_name=session_name
+        )
+
+        # This is internal code to fetch the log for the test.
+        # We add a StreamHandler to capture the log output.
+        logger = logging.getLogger()
+        stream_handler = logging.StreamHandler(captured_output)
+        logger.addHandler(stream_handler)
+        logger.setLevel(logging.INFO)
+
+        logging.info(message_template)
+
+        stream_handler.flush()
+
+        # Check captured output
+        captured_content = captured_output.getvalue()
+        self.assertIn(session_name, captured_content)
 
     @mock.patch('boto3.Session')
     def test_check_aws_credentials(self, mock_session):
