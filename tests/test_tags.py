@@ -34,7 +34,7 @@ class TestLogUtils(TestCase):
                         subject_id="subject123",
                         asset_name="asset-abc",
                     )
-                    
+
         self.assertEqual(metadata["process_name"], "test-process")
         self.assertEqual(metadata["subject_id"], "subject123")
         self.assertEqual(metadata["asset_name"], "asset-abc")
