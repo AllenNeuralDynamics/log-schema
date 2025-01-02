@@ -19,24 +19,22 @@ class TestLogUtils(TestCase):
         """
         Test that the metadata is correctly prepared
         """
-        with (
-            mock.patch("platform.node", return_value="test-node"),
-            mock.patch("os.getpid", return_value=1234),
-            mock.patch.dict(
-                os.environ,
-                {
-                    "HOSTNAME": "test-host",
-                    "CO_COMPUTATION_ID": "test-comp-id",
-                    "CO_CAPSULE_ID": "test-capsule-id",
-                },
-            ),
-        ):
-            metadata = log.prepare_metadata(
-                process_name="test-process",
-                subject_id="subject123",
-                asset_name="asset-abc",
-            )
-
+        with mock.patch("platform.node", return_value="test-node"):
+            with mock.patch("os.getpid", return_value=1234):
+                with mock.patch.dict(
+                    os.environ,
+                    {
+                        "HOSTNAME": "test-host",
+                        "CO_COMPUTATION_ID": "test-comp-id",
+                        "CO_CAPSULE_ID": "test-capsule-id",
+                    },
+                ):
+                    metadata = log.prepare_metadata(
+                        process_name="test-process",
+                        subject_id="subject123",
+                        asset_name="asset-abc",
+                    )
+                    
         self.assertEqual(metadata["process_name"], "test-process")
         self.assertEqual(metadata["subject_id"], "subject123")
         self.assertEqual(metadata["asset_name"], "asset-abc")
