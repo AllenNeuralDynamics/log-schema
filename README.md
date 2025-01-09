@@ -20,7 +20,7 @@ setup_logging("my_process_name", subject_id="subject1",
 logging.info("my log message")
 ```
 
-asset_name should be in the form "<modality>_<mouse_id>_<date>".
+asset_name should be in the form `<modality>_<mouse_id>_<date>`.
 for example: behavior_746346_2024-12-18_12-48-05
 
 ## Installation
