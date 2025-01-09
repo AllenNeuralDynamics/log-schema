@@ -9,9 +9,6 @@ import logging.config
 import logging.handlers
 import os
 import platform
-import sys
-import traceback
-import warnings
 from hashlib import md5
 
 import boto3
@@ -166,8 +163,7 @@ def setup_logging(
     for old_name, new_name in old_to_new.items():
         if old_name in kwargs:
             logging.warning(
-                f"'{old_name}' is deprecated and will be removed in future versions. "
-                f"Use '{new_name}' instead."
+                f"'{old_name}' is deprecated and will be removed in future versions. Use '{new_name}' instead."
             )
             # Use the old parameter value to set the new parameter
             if new_name == "subject_id":
