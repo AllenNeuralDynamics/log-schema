@@ -228,7 +228,7 @@ class TestLogUtils(TestCase):
         logger = logging.getLogger()
         logger.addHandler(stream_handler)
         logger.setLevel(logging.DEBUG)
-        
+
         # This is the line an external user would call
         log.setup_logging(
             process_name="test-process",
@@ -237,8 +237,7 @@ class TestLogUtils(TestCase):
         )
 
         # This is internal code to fetch the log for the test.
-        # We add a StreamHandler to capture the log output.        
-
+        # We add a StreamHandler to capture the log output.
 
         logging.info(message_template)
 
