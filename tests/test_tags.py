@@ -224,6 +224,11 @@ class TestLogUtils(TestCase):
         mouse_id = "999999"
         session_name = f"{mouse_id}-110824"
 
+        stream_handler = logging.StreamHandler(captured_output)
+        logger = logging.getLogger()
+        logger.addHandler(stream_handler)
+        logger.setLevel(logging.DEBUG)
+        
         # This is the line an external user would call
         log.setup_logging(
             process_name="test-process",
@@ -232,11 +237,8 @@ class TestLogUtils(TestCase):
         )
 
         # This is internal code to fetch the log for the test.
-        # We add a StreamHandler to capture the log output.
-        logger = logging.getLogger()
-        stream_handler = logging.StreamHandler(captured_output)
-        logger.addHandler(stream_handler)
-        logger.setLevel(logging.INFO)
+        # We add a StreamHandler to capture the log output.        
+
 
         logging.info(message_template)
 
@@ -244,7 +246,7 @@ class TestLogUtils(TestCase):
 
         # Check captured output
         captured_content = captured_output.getvalue()
-        self.assertIn(session_name, captured_content)
+        self.assertIn("'session_name' is deprecated", captured_content)
 
     @mock.patch("boto3.Session")
     def test_check_aws_credentials(self, mock_session):

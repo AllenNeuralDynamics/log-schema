@@ -54,13 +54,6 @@ def make_record_factory(log_metadata):
         """
         record = log_record_factory(*args, **kwargs)
         # We add the items that we need to track across AIND
-
-        # Check if an exception is being handled before setting exc_info and exc_text
-        exc_info = sys.exc_info()
-        if any(exc_info):
-            record.exc_info = exc_info
-            record.exc_text = traceback.format_exc()
-
         record.hostname = log_metadata.get("hostname", "undefined")
         record.comp_id = log_metadata.get("comp_id", "undefined")
         record.version = log_metadata.get("capsule_id", "undefined")
@@ -172,11 +165,8 @@ def setup_logging(
     # Check for old parameter names in kwargs
     for old_name, new_name in old_to_new.items():
         if old_name in kwargs:
-            warnings.warn(
-                f"'{old_name}' is deprecated and will be removed in future versions. "
-                f"Use '{new_name}' instead.",
-                DeprecationWarning,
-            )
+            logging.warning(f"'{old_name}' is deprecated and will be removed in future versions. "
+                f"Use '{new_name}' instead.")
             # Use the old parameter value to set the new parameter
             if new_name == "subject_id":
                 subject_id = kwargs[old_name]
@@ -244,7 +234,7 @@ def setup_logging(
     else:
         log_config = {
             "version": 1,
-            "disable_existing_loggers": True,
+            "disable_existing_loggers": disable_existing_loggers,
             "root": {
                 "level": "INFO",
                 "handlers": ["console"],
