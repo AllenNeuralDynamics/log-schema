@@ -14,7 +14,10 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-    'boto3', 'watchtower'
+    'boto3',
+    "loguru>=0.7.3",
+    "pydantic>=2.5.3",
+    'watchtower',
 ]
 
 [project.optional-dependencies]
