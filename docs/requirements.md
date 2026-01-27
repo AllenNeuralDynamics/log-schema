@@ -6,7 +6,7 @@ Logging minimum requirements
 - Configurable severity (levels) for log messages
 - Configurable log locations (file, console, log server, Loki)
 - Log message format should be in JSON
-- Time format: ISO 8601
+- Time format: ISO 8601 UTC
 
 Additional features
 
