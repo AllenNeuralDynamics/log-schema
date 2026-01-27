@@ -32,10 +32,10 @@ On the second log call, the field is dynamically updated.
 
 ```python
 logging.info("Test message")
-# [2026-01-22 07:29:35,613] w10dt700123 | Mouse: 614173 | INFO: Test message
+# {"timestamp": "2026-01-27T11:04:15.797396", "level": "INFO", "logger": "root", "message": "Test message", "mouse_id": 614173}
 
 logging.info("Test message", extra={"mouse_id": "999999"})
-# [2026-01-22 07:29:35,613] w10dt700123 | Mouse: 999999 | INFO: Test message
+# {"timestamp": "2026-01-27T11:04:16.797396", "level": "INFO", "logger": "root", "message": "Test message", "mouse_id": 999999}
 ```
 
 ## Dynamic Field (Logger Scope)
@@ -70,5 +70,5 @@ from aind_log_util import setup_logging
 setup_logging("logging-config.yml") 
 
 logging.info("dynamic field - logger scope")
-# [2026-01-22 07:29:35,613] w10dt700123 | Mouse: 100000 | INFO: dynamic field - logger scope
+# {"timestamp": "2026-01-27T11:04:15.797396", "level": "INFO", "logger": "root", "message": "dynamic field - logger scope", "software": "waterlog", "rig_id": "frg", "comp_id": "a asdf", "instance": 1, "hostname": "w10dt700123", "mouse_id": 999999}
 ```
