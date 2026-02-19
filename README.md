@@ -167,7 +167,7 @@ class User(BaseModel):
     inner_most_thoughts: SecretStr
 ```
 
-### Don't rely on logs for monitoring 
+### Don't rely on logs for performance or resource monitoring 
 
 Metrics generally provide continuous and efficient stream of data (think CPU usage over time). Logs aren't really designed to capture this type of data. 
 
