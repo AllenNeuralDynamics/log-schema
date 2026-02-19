@@ -64,7 +64,7 @@ Note: this is not an actual schema, just an example.
       "examples": ["DT700413"]
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true 
 }
 ```
 
@@ -101,9 +101,7 @@ class DefaultLogFields(BaseModel):
         examples=["DT700413"],
     )
 
-    model_config = {
-        "extra": "forbid",
-    }
+    model_config = ConfigDict(extra='allow')  
 ```
 
 
@@ -149,9 +147,7 @@ class DefaultLogFields(BaseModel):
         examples=["DT700413"],
     )
 
-    model_config = {
-        "extra": "forbid",
-    }
+    model_config = ConfigDict(extra='allow')  
 ```
 
 
