@@ -43,7 +43,7 @@ Example structured logs in a file:
 
 ### Levels
 
-Levels should be used to organize logs with different severity. The following leveling scheme is based on the python standard logging library. 
+Levels should be used to organize logs with different severity. The following leveling scheme is based on the python standard logging library. **When using levels in logs, the string should be used.**
 
 The table below provides the string used for a level, the number value associated with that level, and a description of what events/scenarios should be associated with that level.
 
@@ -125,7 +125,7 @@ Here is an example of two canonical logs:
   "level": "INFO",
   "message": "Session recorded",
   "subject_id": "713491",
-  "instrument_id": "lickspout",
+  "instrument_id": "frg_1_a",
   "status": "success",
   "database": "dataverse",
   "user_id": "bobby.b",
@@ -137,7 +137,7 @@ Here is an example of two canonical logs:
   "level": "ERROR",
   "message": "Failed to save session: could not connect to database",
   "subject_id": "713491",
-  "instrument_id": "lickspout",
+  "instrument_id": "frg_1_a",
   "status": "fail",
   "database": "dataverse",
   "error_type": "TimeoutError",
