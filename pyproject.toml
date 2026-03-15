@@ -24,8 +24,14 @@ dev = [
     'flake8',
     'interrogate',
     'isort',
+    'pydantic',
     'Sphinx',
     'furo'
+]
+
+schema = [
+    "pydantic",
+    "datamodel-code-generator"
 ]
 
 [tool.setuptools.packages.find]
