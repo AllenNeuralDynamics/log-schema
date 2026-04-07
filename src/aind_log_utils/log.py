@@ -14,7 +14,7 @@ _CONFIG_PATH = os.path.join(
 )
 
 
-def setup_logging_cloudwatch(log_stream: str, **fields) -> None:
+def setup_logging_cloudwatch(log_stream: str, **fields: str) -> None:
     """Load logging.yml and configure logging for the application.
 
     Also adds a CloudWatch handler so logs are sent to the default log group.
@@ -101,7 +101,8 @@ class AindJsonFormatter(logging.Formatter):
 
     _DEFAULT_FIELDS = ["timestamp", "level", "message", "acquisition_name"]
 
-    def __init__(self, fields=None):
+    def __init__(self, fields: list[str] | None = None) -> None:
+        """Initialize AindJsonFormatter"""
         super().__init__()
         if fields is None:
             self.fields = self._DEFAULT_FIELDS
@@ -111,7 +112,8 @@ class AindJsonFormatter(logging.Formatter):
             missing = [f for f in self._DEFAULT_FIELDS if f not in fields]
             self.fields = list(fields) + missing
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
+        """Format JSON"""
         log_entry = {}
         for field in self.fields:
             if field == "timestamp":
@@ -146,11 +148,13 @@ class AindContextFilter(logging.Filter):
     extra={} when logging.
     """
 
-    def __init__(self, **fields):
+    def __init__(self, **fields: str) -> None:
+        """Initialize AindContextFilter"""
         super().__init__()
         self.fields = fields
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Filter fields"""
         # Only set if not already present (allows per-call overrides via
         # extra={})
         for key, value in self.fields.items():
