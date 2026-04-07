@@ -40,6 +40,7 @@ MINIMAL_LOGGING_YML = textwrap.dedent("""\
 
 
 def _make_record(msg="hello", level=logging.INFO, exc_info=None, **kwargs):
+    """Make log record"""
     record = logging.LogRecord(
         name="test",
         level=level,
@@ -58,6 +59,7 @@ class TestAindJsonFormatterDefaultFields(unittest.TestCase):
     """AindJsonFormatter with default field list."""
 
     def setUp(self):
+        """Setup TestAindJsonFormatterDefaultFields"""
         self.formatter = AindJsonFormatter()
 
     def test_default_field_list(self):
@@ -188,12 +190,14 @@ class TestAddCloudwatchHandler(unittest.TestCase):
     """Tests for add_cloudwatch_handler."""
 
     def _save_and_clear_root_handlers(self):
+        """Clear root handler"""
         root = logging.getLogger()
         saved = root.handlers[:]
         root.handlers.clear()
         return saved
 
     def _restore_root_handlers(self, saved):
+        """Restore root handlers"""
         root = logging.getLogger()
         root.handlers = saved
 
@@ -304,6 +308,7 @@ class TestSetupLogging(unittest.TestCase):
     """Tests for setup_logging_cloudwatch."""
 
     def tearDown(self):
+        """Tear down"""
         logging.getLogger().handlers.clear()
 
     def test_fallback_to_basicconfig_when_yml_missing(self):
