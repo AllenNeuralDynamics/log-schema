@@ -128,10 +128,12 @@ class AindJsonFormatter(logging.Formatter):
                 log_entry["level"] = record.levelname
             elif field == "message":
                 log_entry["message"] = record.getMessage()
+            elif field in self._DEFAULT_FIELDS:
+                log_entry[field] = getattr(record, field, "undefined")
             else:
                 value = getattr(record, field, None)
-                # Keep optional fields (like event_type) out of logs unless
-                # explicitly provided on a log call via extra={...}.
+                # Keep optional fields out of logs unless explicitly provided
+                # on a log call via extra={...}.
                 if value is not None and value != "undefined":
                     log_entry[field] = value
         if record.exc_info:
