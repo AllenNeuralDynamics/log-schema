@@ -100,8 +100,7 @@ class AindJsonFormatter(logging.Formatter):
     """
 
     _DEFAULT_FIELDS = ["timestamp", "level", "message", "acquisition_name"]
-    _REQUIRED_FIELDS = {"timestamp", "level", "message", "acquisition_name"}
-
+    
     def __init__(self, fields=None):
         super().__init__()
         if fields is None:
@@ -117,9 +116,7 @@ class AindJsonFormatter(logging.Formatter):
         for field in self.fields:
             if field == "timestamp":
                 log_entry["timestamp"] = (
-                    datetime.datetime.fromtimestamp(
-                        record.created, tz=datetime.timezone.utc
-                    )
+                    datetime.datetime.fromtimestamp(record.created, tz=datetime.timezone.utc)
                     .astimezone()
                     .isoformat(timespec="milliseconds")
                 )
@@ -128,7 +125,11 @@ class AindJsonFormatter(logging.Formatter):
             elif field == "message":
                 log_entry["message"] = record.getMessage()
             else:
-                log_entry[field] = getattr(record, field, "undefined")
+                value = getattr(record, field, None)
+                # Keep optional fields (like event_type) out of logs unless
+                # explicitly provided on a log call via extra={...}.
+                if value is not None and value != "undefined":
+                    log_entry[field] = value
         if record.exc_info:
             log_entry["exc_info"] = self.formatException(record.exc_info)
         return json.dumps(log_entry)
