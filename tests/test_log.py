@@ -207,7 +207,7 @@ class TestAddCloudwatchHandler(unittest.TestCase):
 
     def test_creates_handler_with_correct_arguments(self):
         """CloudWatchLogHandler is constructed with the right stream
-         and group."""
+        and group."""
         mock_wt = MagicMock()
         mock_handler = MagicMock()
         mock_wt.CloudWatchLogHandler.return_value = mock_handler

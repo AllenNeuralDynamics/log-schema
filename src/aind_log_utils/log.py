@@ -100,7 +100,7 @@ class AindJsonFormatter(logging.Formatter):
     """
 
     _DEFAULT_FIELDS = ["timestamp", "level", "message", "acquisition_name"]
-    
+
     def __init__(self, fields=None):
         super().__init__()
         if fields is None:
@@ -116,7 +116,9 @@ class AindJsonFormatter(logging.Formatter):
         for field in self.fields:
             if field == "timestamp":
                 log_entry["timestamp"] = (
-                    datetime.datetime.fromtimestamp(record.created, tz=datetime.timezone.utc)
+                    datetime.datetime.fromtimestamp(
+                        record.created, tz=datetime.timezone.utc
+                    )
                     .astimezone()
                     .isoformat(timespec="milliseconds")
                 )
