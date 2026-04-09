@@ -1,0 +1,20 @@
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    "()": aind_log_utils.main.DefaultFormatter
+    static_fields:
+      software_name: aind-thingy-doo-dad
+      acquisition_name: beep-boop-grabber
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+    stream: ext://sys.stdout
+loggers:
+  "":
+    handlers:
+      - console
+    level: DEBUG 

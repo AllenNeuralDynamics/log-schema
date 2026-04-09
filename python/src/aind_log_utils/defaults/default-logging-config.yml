@@ -1,0 +1,18 @@
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    "()": aind_log_utils.main.DefaultFormatter
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+    stream: ext://sys.stdout
+loggers:
+  "":
+    handlers:
+      - console
+    level: INFO
+    propagate: true
