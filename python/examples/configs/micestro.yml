@@ -1,0 +1,27 @@
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    "()": aind_log_utils.main.DefaultFormatter
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+    stream: ext://sys.stdout
+  file:
+    class: logging.FileHandler
+    formatter: default
+    level: INFO
+    filename: micestro.log
+
+loggers:
+  "":
+    handlers:
+      - console
+      - file 
+    level: INFO
+    propagate: true
+
