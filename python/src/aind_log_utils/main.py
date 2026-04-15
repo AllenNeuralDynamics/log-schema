@@ -49,7 +49,7 @@ class DefaultFormatter(log_json.JsonFormatter):
         if "static_fields" not in kwargs and models:
             if isinstance(models, dict):
                 kwargs["static_fields"] = models
-            else: 
+            else:
                 kwargs["static_fields"] = models.model_dump(exclude_none=True)
         super().__init__(*args, **kwargs)
 
@@ -80,6 +80,7 @@ def _get_default_config():
 
 def setup_logging(
     path_to_config: str | None = None,
+    config: dict | None = None,
     model: BaseModel | dict | None = None,
 ):
     try:
