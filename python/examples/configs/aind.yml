@@ -4,17 +4,25 @@ disable_existing_loggers: false
 formatters:
   default:
     "()": aind_log_utils.main.DefaultFormatter
-    static_fields:
-      software_name: aind-thingy-doo-dad
-      acquisition_name: beep-boop-grabber
+    # static_fields:
+    #   software_name: aind-thingy-doo-dad
+    #   acquisition_name: beep-boop-grabber
 handlers:
   console:
     class: logging.StreamHandler
     formatter: default
     level: INFO
     stream: ext://sys.stdout
+  cloudwatch:
+    class: watchtower.CloudWatchLogHandler
+    formatter: default
+    log_stream_name: arielles-test-stream 
+    log_group: aind/internal-logs
+    level: INFO
+    boto3_session: null # ???
 loggers:
   "":
     handlers:
       - console
+      - cloudwatch
     level: DEBUG 
