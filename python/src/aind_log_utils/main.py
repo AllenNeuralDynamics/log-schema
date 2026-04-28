@@ -6,7 +6,7 @@ from logging import LogRecord
 
 import yaml
 from pydantic import BaseModel
-from pythonjsonlogger import jsonlogger as log_json
+from pythonjsonlogger import json as log_json
 
 
 class DefaultFormatter(log_json.JsonFormatter):
@@ -83,28 +83,35 @@ def setup_logging(
     config: dict | None = None,
     model: BaseModel | dict | None = None,
 ):
-    try:
-        with open(path_to_config, "r") as f:
-            config = yaml.safe_load(f.read())
-    except Exception:
-        if path_to_config:
-            print("config not found using defaults")
+    if path_to_config:
+        try:
+            with open(path_to_config, "r") as f:
+                config = yaml.safe_load(f.read())
+        except FileNotFoundError:
+            print("config not found, using defaults")
+        except yaml.YAMLError:
+            print("config is invalid, using defaults")
+
+    if config is None:
         config = _get_default_config()
 
     # In the config, if formatter is using the DefaultFormatter, add static fields from the model to that formatter
     # Only adds from model if static fields is not already defined
-    for formatter_key in config["formatters"]:
-        formatter = config["formatters"][formatter_key]
-        if "()" in formatter and formatter["()"] == "aind_log_utils.main.DefaultFormatter":
-            if model:
-                if "static_fields" not in formatter or formatter["static_fields"] is None:
-                    formatter["static_fields"] = {}
-                if isinstance(model, dict):
-                    new_fields = model.items()
-                else:
-                    new_fields = model.model_dump(exclude_none=True).items()
-                for field, value in new_fields:
-                    formatter["static_fields"][field] = value
+    if "formatters" in config:
+        for formatter_key in config["formatters"]:
+            formatter = config["formatters"][formatter_key]
+            if "()" in formatter and formatter["()"] == "aind_log_utils.main.DefaultFormatter":
+                if model:
+                    if "static_fields" not in formatter or formatter["static_fields"] is None:
+                        formatter["static_fields"] = {}
+                    if isinstance(model, dict):
+                        new_fields = model.items()
+                    elif isinstance(model, BaseModel):
+                        new_fields = model.model_dump(exclude_none=True).items()
+                    else:
+                        raise TypeError("Model must be a dict or pydantic BaseModel")
+                    for field, value in new_fields:
+                        formatter["static_fields"][field] = value
 
     # Setup logger with configuration file
     logging.config.dictConfig(config)
