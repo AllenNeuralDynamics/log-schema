@@ -49,8 +49,10 @@ class DefaultFormatter(log_json.JsonFormatter):
         if "static_fields" not in kwargs and models:
             if isinstance(models, dict):
                 kwargs["static_fields"] = models
-            else:
+            elif isinstance(models, BaseModel):
                 kwargs["static_fields"] = models.model_dump(exclude_none=True)
+            else: 
+                raise TypeError("Model must be a dict or pydantic BaseModel")
         super().__init__(*args, **kwargs)
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
