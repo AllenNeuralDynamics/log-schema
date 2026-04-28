@@ -1,10 +1,10 @@
 import importlib.resources as resources
 import logging
 import logging.config
-import yaml
-
 from datetime import datetime, timezone
 from logging import LogRecord
+
+import yaml
 from pydantic import BaseModel
 from pythonjsonlogger import jsonlogger as log_json
 
