@@ -1,4 +1,4 @@
-""" This file is the main file for the aind-log-utils package. It contains the
+"""This file is the main file for the aind-log-utils package. It contains the
 functions that are meant to be used by the users of the package.
 """
 
@@ -67,9 +67,7 @@ def make_record_factory(log_metadata):
         record.AWS_METADATA_SERVICE_NUM_ATTEMPTS = os.getenv(
             "AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined"
         )
-        record.AWS_BATCH_JOB_ATTEMPT = os.getenv(
-            "AWS_BATCH_JOB_ATTEMPT", "undefined"
-        )
+        record.AWS_BATCH_JOB_ATTEMPT = os.getenv("AWS_BATCH_JOB_ATTEMPT", "undefined")
         record.AWS_MAX_ATTEMPTS = os.getenv("AWS_MAX_ATTEMPTS", "undefined")
 
         return record
@@ -100,9 +98,7 @@ def prepare_metadata(process_name, subject_id, asset_name):
         platform.node(),
         str(os.getpid()),
     ]
-    log_metadata["log_session"] = md5(
-        ("".join(session_parts)).encode("utf-8")
-    ).hexdigest()[:7]
+    log_metadata["log_session"] = md5(("".join(session_parts)).encode("utf-8")).hexdigest()[:7]
     log_metadata["hostname"] = os.getenv("HOSTNAME", "undefined")
     log_metadata["comp_id"] = os.getenv("CO_COMPUTATION_ID", "undefined")
     log_metadata["capsule_id"] = os.getenv("CO_CAPSULE_ID", "undefined")
@@ -110,24 +106,14 @@ def prepare_metadata(process_name, subject_id, asset_name):
 
     log_metadata["CO_MEMORY"] = os.getenv("CO_MEMORY", "undefined")
     log_metadata["CO_CPUS"] = os.getenv("CO_CPUS", "undefined")
-    log_metadata["AWS_BATCH_JOB_ID"] = os.getenv(
-        "AWS_BATCH_JOB_ID", "undefined"
-    )
-    log_metadata["AWS_BATCH_CE_NAME"] = os.getenv(
-        "AWS_BATCH_CE_NAME", "undefined"
-    )
-    log_metadata["AWS_BATCH_JQ_NAME"] = os.getenv(
-        "AWS_BATCH_JQ_NAME", "undefined"
-    )
+    log_metadata["AWS_BATCH_JOB_ID"] = os.getenv("AWS_BATCH_JOB_ID", "undefined")
+    log_metadata["AWS_BATCH_CE_NAME"] = os.getenv("AWS_BATCH_CE_NAME", "undefined")
+    log_metadata["AWS_BATCH_JQ_NAME"] = os.getenv("AWS_BATCH_JQ_NAME", "undefined")
     log_metadata["AWS_METADATA_SERVICE_NUM_ATTEMPTS"] = os.getenv(
         "AWS_METADATA_SERVICE_NUM_ATTEMPTS", "undefined"
     )
-    log_metadata["AWS_BATCH_JOB_ATTEMPT"] = os.getenv(
-        "AWS_BATCH_JOB_ATTEMPT", "undefined"
-    )
-    log_metadata["AWS_MAX_ATTEMPTS"] = os.getenv(
-        "AWS_MAX_ATTEMPTS", "undefined"
-    )
+    log_metadata["AWS_BATCH_JOB_ATTEMPT"] = os.getenv("AWS_BATCH_JOB_ATTEMPT", "undefined")
+    log_metadata["AWS_MAX_ATTEMPTS"] = os.getenv("AWS_MAX_ATTEMPTS", "undefined")
 
     return log_metadata
 
@@ -163,7 +149,8 @@ def setup_logging(
     for old_name, new_name in old_to_new.items():
         if old_name in kwargs:
             logging.warning(
-                f"'{old_name}' is deprecated and will be removed in future versions. Use '{new_name}' instead."
+                f"'{old_name}' is deprecated and will be removed in future versions. "
+                f"Use '{new_name}' instead."
             )
             # Use the old parameter value to set the new parameter
             if new_name == "subject_id":
