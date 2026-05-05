@@ -1,23 +1,52 @@
-name: Type Lint and Test Python
+name: Lint, Type Check, and Test
 
-on: 
+on:
   workflow_dispatch:
-  # pull_request: 
-  #   branches: 
-  #     - "main"
-  #     - "dev"
-  #   types: [opened, synchronize, reopened, ready_for_review]
+    inputs:
+      main_directory:
+        description: "Directory to run type check on"
+        required: true
+        default: "python/src"
+      test_directory:
+        description: "Directory to run the test on"
+        required: true
+        default: "tests"
 
-jobs: 
+jobs:
   # Lint check and Type check ran in parallel
   lint_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/lint.yml@main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v4
+      - name: Lint with Ruff
+        run: uvx run ruff check
 
   type_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/type.yml@main
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "2.7", "3.12" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v4
+      - name: Type check with mypy
+        run: |
+          uvx run mypy ${{ github.event.inputs.main_directory }} --strict
 
-  # Run unit tests if lint and type check passes
-  tests:
-    needs: [lint_check, type_check]
-    uses: AllenNeuralDynamics/.github/.github/workflows/test.yml@main
-  
+  test_check:
+    needs: [ lint_check, type_check ]
+    runs-on: [ ubuntu-latest, windows-latest ]
+    strategy:
+      matrix:
+        python-version: [ "2.7", "3.12" ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install UV - set python version to ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Unit test with PyTest
+        run: uvx run pytest ${{ github.event.inputs.test_directory }}
