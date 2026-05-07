@@ -1,8 +1,8 @@
 import logging
+
 import watchtower
 
-from aind_log_utils import setup_logging, DefaultFormatter
-
+from aind_log_utils import DefaultFormatter, setup_logging
 
 # Model with fields we want to see in every log
 fake_model = {"who da best": "arielle", "wow": "so many fields", "boop": "beep"}

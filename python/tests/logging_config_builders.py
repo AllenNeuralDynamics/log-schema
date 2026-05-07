@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class ConfigBuilder:
     def get_invalid_config_file_content(self):
         return """im bad"""
@@ -25,7 +28,7 @@ class ConfigBuilder:
         """
 
     def get_config_dict(self, has_default_format: bool, has_static_fields: bool):
-        config = {
+        config: dict[str, Any] = {
             "version": 1,
             "disable_existing_loggers": False,
             "formatters": {

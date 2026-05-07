@@ -3,7 +3,6 @@ from pathlib import Path
 
 from aind_log_utils import setup_logging
 
-
 CONFIG_PATH = Path(__file__).resolve().parent / "configs" / "micestro.yml"
 
 
@@ -11,7 +10,8 @@ def micestro_mock():
     # Micestro starts
     #   1) Get experiment_type somehow
     #   2) Get session_id
-    #   3) Set session_id as environment variable (this is for bonsai subprocess to know what session its in)
+    #   3) Set session_id as environment variable 
+    #       (this is for bonsai subprocess to know what session its in)
     #   4) Setup logging with those fields
 
     micestro_log_fields = {
@@ -35,7 +35,8 @@ def micestro_mock():
     logging.info("Launching Bonsai")
 
     logging.info("Starting task generation")
-    # This runs in bonsai, it will log its own file (correlates to this through the session_id that was set as an environment variable before launching bonsai)
+    # This runs in bonsai, it will log its own file (correlates to this through the session_id that
+    # was set as an environment variable before launching bonsai)
     logging.info("Finished task generation")
 
     logging.info("Starting task curriculum")

@@ -1,9 +1,9 @@
 import logging
 from pathlib import Path
 
-from aind_log_utils import setup_logging, DefaultFormatter
 from pydantic_settings import BaseSettings
 
+from aind_log_utils import DefaultFormatter, setup_logging
 
 CONFIG_PATH = Path(__file__).resolve().parent / "configs" / "aind.yml"
 
