@@ -53,6 +53,12 @@ def setup_default():
 
 
 def setup_with_custom_config_file():
+    """
+    This example shows using a custom logging config (from logging.config) to setup logging. The
+    config contents are loaded from a yaml file (config.yml)
+
+    In the config file, we specify using the DefaultFormatter to ensure logs are formatted correctly
+    """
     setup_logging(path_to_config=CONFIG_PATH)
 
     # Contains additional field "configure_by" with value "file"
@@ -60,6 +66,14 @@ def setup_with_custom_config_file():
 
 
 def setup_with_custom_config_dict():
+    """
+    This example shows using a custom logging config (from logging.config) to setup logging. The
+    config contents are loaded from a dictionary (CONFIG_DICT)
+
+    In the config dictionary, we specify using the DefaultFormatter to ensure logs are formatted
+    correctly.
+    """
+
     setup_logging(config=CONFIG_DICT)
 
     # Contains additional field "configure_by" with value "dictionary"
@@ -80,6 +94,12 @@ def setup_with_custom_fields_from_dict():
 
 
 def setup_with_custom_fields_from_basemodel():
+    """
+    This example shows adding logging labels through the use of a pydantic BaseModel. The fields
+    defined in the BaseModel will be added as static fields to the log formatter.
+
+    By default, it will ignore empty (None) fields in the BaseModel.
+    """
     class CustomModel(BaseModel):
         custom_field: str = "from_basemodel"
 
@@ -89,6 +109,9 @@ def setup_with_custom_fields_from_basemodel():
 
 
 def setup_with_custom_fields_from_extras():
+    """
+    This example uses a dictionary to add additional logging labels. 
+    """
     setup_logging()
     logging.info("Field defined from extras", extra={"custom_field": "from_extras"})
 
