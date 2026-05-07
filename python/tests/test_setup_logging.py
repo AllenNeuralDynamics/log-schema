@@ -1,9 +1,9 @@
 import json
 import logging
-from datetime import datetime
 from unittest.mock import mock_open, patch
 
 import pytest
+from dateutil import parser
 
 from aind_log_utils.main import setup_logging
 from tests.logging_config_builders import ConfigBuilder
@@ -229,7 +229,7 @@ def test_invalid_config_path_uses_default(capsys):
 
     # Test that timestamp is in ISO 8601 format
     try:
-        datetime.fromisoformat(log_entry["timestamp"])
+        parser.isoparse(log_entry["timestamp"])
     except ValueError:
         assert False, "Timestamp is not in ISO 8601 format"
 
@@ -265,7 +265,7 @@ def _extract_log_entry_from_capsys(capsys):
 
 def _test_timestamp_format(log_entry):
     try:
-        datetime.fromisoformat(log_entry["timestamp"])
+        parser.isoparse(log_entry["timestamp"])
     except ValueError:
         assert False, "Timestamp is not in ISO 8601 format"
     return True
