@@ -5,11 +5,7 @@ formatters:
   default:
     "()": aind_log_utils.main.DefaultFormatter
     static_fields:
-      scope: default 
-  other:
-    static_fields:
-      scope: other
-    "()": aind_log_utils.main.DefaultFormatter
+      configure_by: file
 
 handlers:
   console:
@@ -17,16 +13,10 @@ handlers:
     formatter: default
     level: INFO
     stream: ext://sys.stdout
-  console_other:
-    class: logging.StreamHandler
-    formatter: other
-    level: INFO
-    stream: ext://sys.stdout
 
 loggers:
   "":
     handlers:
       - console
-      - console_other
     level: INFO
     propagate: true

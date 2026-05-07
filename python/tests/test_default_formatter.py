@@ -39,7 +39,7 @@ def test_default_formatter_preserves_custom_fmt_and_style():
 
 
 def test_default_formatter_adds_static_fields_from_dict_model():
-    formatter = DefaultFormatter(models={"app_name": "my_app", "env": "production"})
+    formatter = DefaultFormatter(model={"app_name": "my_app", "env": "production"})
     record = _make_record("hello")
     payload = _format_to_dict(formatter, record)
 
@@ -48,7 +48,7 @@ def test_default_formatter_adds_static_fields_from_dict_model():
 
 
 def test_default_formatter_adds_static_fields_from_pydantic_model():
-    formatter = DefaultFormatter(models=LogConfigModel())
+    formatter = DefaultFormatter(model=LogConfigModel())
     record = _make_record("hello")
     payload = _format_to_dict(formatter, record)
 
@@ -58,12 +58,12 @@ def test_default_formatter_adds_static_fields_from_pydantic_model():
 
 def test_default_formatter_invalid_model_type_raises_type_error():
     with pytest.raises(TypeError):
-        DefaultFormatter(models=123)
+        DefaultFormatter(model=123)
 
 
 def test_default_formatter_does_not_override_existing_static_fields():
     formatter = DefaultFormatter(
-        models={"env": "from_model", "app_name": "from_model"},
+        model={"env": "from_model", "app_name": "from_model"},
         static_fields={"env": "from_config", "fixed": "yes"},
     )
     record = _make_record("hello")

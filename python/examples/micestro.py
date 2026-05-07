@@ -10,7 +10,7 @@ def micestro_mock():
     # Micestro starts
     #   1) Get experiment_type somehow
     #   2) Get session_id
-    #   3) Set session_id as environment variable 
+    #   3) Set session_id as environment variable
     #       (this is for bonsai subprocess to know what session its in)
     #   4) Setup logging with those fields
 
