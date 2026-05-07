@@ -2,15 +2,15 @@ name: Lint, Type Check, and Test
 
 on:
   workflow_dispatch:
-    inputs:
-      main_directory:
-        description: "Directory to run type check on"
-        required: true
-        default: "python/src"
-      test_directory:
-        description: "Directory to run the test on"
-        required: true
-        default: "tests"
+  pull_request:
+    branches:
+      - main
+      - dev
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+env:
+  MAIN_DIRECTORY: "python/src"
+  TEST_DIRECTORY: "tests"
 
 jobs:
   # Lint check and Type check ran in parallel
@@ -26,20 +26,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "2.7", "3.12" ]
+        python-version: [ "3.7", "3.12" ]
     steps:
       - uses: actions/checkout@v3
       - uses: astral-sh/setup-uv@v4
       - name: Type check with mypy
         run: |
-          uvx run mypy ${{ github.event.inputs.main_directory }} --strict
+          uvx run mypy ${{ env.MAIN_DIRECTORY }} --strict
 
   test_check:
     needs: [ lint_check, type_check ]
     runs-on: [ ubuntu-latest, windows-latest ]
     strategy:
       matrix:
-        python-version: [ "2.7", "3.12" ]
+        python-version: [ "3.7", "3.12" ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -49,4 +49,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       - name: Unit test with PyTest
-        run: uvx run pytest ${{ github.event.inputs.test_directory }}
+        run: uvx run pytest ${{ env.TEST_DIRECTORY }}
