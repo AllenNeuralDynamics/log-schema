@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-log-utils/main/schema/logs.json",
+  "title": "AIND Log Entry",
+  "description": "A single structured log entry conforming to the AIND Logging Standards (https://github.com/AllenNeuralDynamics/aind-log-utils). When persisting logs to a file, use the JSON Lines format (JSONL) — one JSON object per line, no trailing comma, no surrounding array. The three fields 'timestamp', 'level', and 'message' are always required. All other properties are optional but MUST use the canonical names defined here whenever they apply. Arbitrary domain-specific fields (e.g. sensor readings, status codes, custom metrics) are allowed via additionalProperties.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": ["timestamp", "level", "message"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "timestamp": {
+      "title": "Timestamp",
+      "description": "The date and time at which the log entry was created, expressed in ISO 8601 / RFC 3339 format. The value MUST be in UTC and MUST include the 'Z' timezone designator or a '+00:00' offset. Sub-second precision (up to microseconds) is recommended.",
+      "type": "string",
+      "format": "date-time",
+      "examples": [
+        "2026-02-09T21:19:24.061270Z",
+        "2026-01-01T00:00:00Z",
+        "2026-02-09T21:19:24.061270+00:00"
+      ]
+    },
+
+    "level": {
+      "title": "Log Level",
+      "description": "The severity level of the log entry. Use the string identifier — never the numeric value. Levels mirror the Python standard logging library:\n  DEBUG (10)    — Detailed diagnostics, useful only during development.\n  INFO (20)     — Significant business or operational events (default level).\n  WARNING (30)  — Unexpected situations that may indicate future problems.\n  ERROR (40)    — Failures that affect a specific operation but not the whole program.\n  CRITICAL (50) — Failures that affect the entire program or require immediate attention.",
+      "type": "string",
+      "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      "examples": ["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"]
+    },
+
+    "message": {
+      "title": "Message",
+      "description": "A human-readable description of the event being logged. Messages should be specific, self-contained, and actionable. Include relevant identifiers and error details directly in the string rather than relying on other fields to provide context. Prefer 'Failed to save subject info: field experiment_id is missing' over 'Save failed'.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "Starting program",
+        "Connecting to database",
+        "Successfully retrieved data",
+        "Closing program",
+        "Failed to save subject info: field 'experiment_id' is missing",
+        "Session recorded",
+        "Failed to save session: could not connect to database"
+      ]
+    },
+
+    "lineno": {
+      "title": "Source Line Number",
+      "description": "The line number in the source file where the logging call was issued. Populated automatically by Python's logging module.",
+      "type": "integer",
+      "minimum": 1,
+      "examples": [1, 20, 39, 142]
+    },
+
+    "process": {
+      "title": "Process ID",
+      "description": "The operating-system process identifier (PID) of the process that emitted the log. Python's logging module records this as an integer; string representations are also accepted for compatibility with systems that serialize all fields as strings.",
+      "type": ["integer", "string"],
+      "examples": [1231, 9842, "1231"]
+    },
+
+    "processName": {
+      "title": "Process Name",
+      "description": "The human-readable name of the OS process that emitted the log. Reported by Python's logging module as 'MainProcess' for the main process and 'Process-N' for child processes.",
+      "type": "string",
+      "examples": ["MainProcess", "Process-2", "python.exe"]
+    },
+
+    "thread": {
+      "title": "Thread ID",
+      "description": "The operating-system thread identifier of the thread that emitted the log. Python's logging module records this as an integer; string representations are also accepted.",
+      "type": "string",
+      "examples": ["12913", "139785", "12913"]
+    },
+
+    "threadName": {
+      "title": "Thread Name",
+      "description": "The human-readable name of the thread that emitted the log. Reported by Python's logging module as 'MainThread' for the primary thread.",
+      "type": "string",
+      "examples": ["MainThread", "Thread-1", "worker-pool-3"]
+    },
+
+    "hostname": {
+      "title": "Hostname",
+      "description": "The network hostname of the machine running the software. On Code Ocean this is read from the HOSTNAME environment variable.",
+      "type": "string",
+      "examples": ["w10dt700140"]
+    },
+
+    "software_name": {
+      "title": "Software Name",
+      "description": "The name of the application or library generating the log entry.",
+      "type": "string",
+      "examples": ["waterlog", "aind-data-schema", "aind-log-utils", "aind-ephys-pipeline"]
+    },
+
+    "software_version": {
+      "title": "Software Version",
+      "description": "The version string of the software generating the log. Should follow semantic versioning (MAJOR.MINOR.PATCH).",
+      "type": "string",
+      "examples": ["1.0.4", "1.0.4.dev0", "0.3.1", "2.1.0rc1"]
+    },
+
+    "rig_id": {
+      "title": "Rig ID",
+      "description": "SIPE's naming convention for rigs and acquisition machines. On a configured rig this value is available in the 'aibs_comp_id' environment variable. Used to correlate logs back to a specific physical setup.",
+      "type": "string",
+      "examples": ["frg_1_a", "ephys_9_acq", "meso_4_acq", "behavior_2_a"]
+    },
+
+    "instrument_id": {
+      "title": "Instrument ID",
+      "description": "Scientific Computing's canonical identifier for an instrument, as defined in the aind-data-schema Instrument model (https://aind-data-schema.readthedocs.io/en/latest/instrument.html).",
+      "type": "string"
+    },
+
+    "acquisition_name": {
+      "title": "Acquisition Name",
+      "description": "The unique name of an acquisition session, composed as '<subject_id>_<acquisition-date>_<acquisition-time>'. Required for all acquisition software. Date format is YYYY-MM-DD; time format is HH-MM-SS (using hyphens, not colons).",
+      "type": "string",
+      "pattern": "^[^_]+_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}$",
+      "examples": [
+        "123456_2026-01-01_23-00-00",
+        "714392_2026-02-09_08-30-00",
+        "713491_2025-12-31_15-45-00"
+      ]
+    },
+
+    "subject_id": {
+      "title": "Subject ID",
+      "description": "Unique identifier for the animal or subject from which data is being acquired. Typically a numeric string assigned by the colony management system.",
+      "type": "string",
+      "examples": ["123456", "713491", "714392", "calibration"]
+    },
+
+    "specimen_id": {
+      "title": "Specimen ID",
+      "description": "Identifier for a tissue sample removed from a subject. Must include the subject_id as a prefix. For whole-brain specimens, the subject_id alone is sufficient. For sectioned specimens, append a zero-padded three-digit section index.",
+      "type": "string",
+      "examples": ["123456", "123456_001", "123456_007", "123456_042"]
+    },
+
+    "pipeline_name": {
+      "title": "Pipeline Name",
+      "description": "The name of the data pipeline (workflow orchestrator, DAG, or pipeline definition) that is processing, transforming, or quality-controlling raw data.",
+      "type": "string",
+      "examples": ["codeocean-spike-sorting-pipeline", "airflow-dag-ephys-qc", "nwb-packaging-dag"]
+    },
+
+    "process_name": {
+      "title": "Process Name",
+      "description": "The name of the individual container, capsule, or compute step within a pipeline that is processing, transforming, or quality-controlling raw data.",
+      "type": "string",
+      "examples": ["kilosort4-capsule", "nwb-packager", "dlc-pose-estimation"]
+    },
+
+    "user_id": {
+      "title": "User ID",
+      "description": "Identifier for the human user operating the software. Intended for acquisition software where a technician or scientist is actively running an experiment. Use the institutional username.",
+      "type": "string",
+      "examples": ["bobby.b", "jane.doe", "svc-acq-robot", "john.smith"]
+    },
+
+    "log_session": {
+      "title": "Log Session",
+      "description": "A short ephemeral token (7 hex characters) that groups every log entry emitted during a single process invocation. Generated at startup from an MD5 hash of the current timestamp, hostname, and PID, then truncated to 7 characters. Allows filtering all logs from one run without knowing the PID or timestamp range.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{7}$",
+      "examples": ["a1b2c3d", "f4e5d6c", "0ab12ef"]
+    },
+
+    "comp_id": {
+      "title": "Code Ocean Computation ID",
+      "description": "The unique identifier for a Code Ocean computation run, sourced from the CO_COMPUTATION_ID environment variable. Present only when the software is executing inside a Code Ocean capsule. Set to 'undefined' when not available.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["co-comp-abc123def456", "4f8b2c1a-9e3d-4b7f-a5c6-1d2e3f4a5b6c", "undefined"]
+    },
+
+    "capsule_id": {
+      "title": "Code Ocean Capsule ID",
+      "description": "The unique identifier for the Code Ocean capsule that produced the log, sourced from the CO_CAPSULE_ID environment variable. Also used as the CloudWatch log stream name. Set to 'undefined' when not available.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["co-capsule-xyz789", "abc12345-6789-0def-ghij-klmnopqrstuv", "undefined"]
+    },
+
+    "asset_name": {
+      "title": "Asset Name",
+      "description": "The name of the Code Ocean data asset being processed by the capsule. Supersedes the legacy 'session_name' parameter.",
+      "type": "string",
+      "examples": [
+        "ecephys_123456_2026-01-01_00-00-00",
+        "behavior_714392_2026-02-10_09-15-00",
+        "fip_713491_2025-12-31_15-45-00"
+      ]
+    },
+
+    "user_name": {
+      "title": "User Name (Code Ocean)",
+      "description": "The username associated with the Code Ocean computation or pipeline run. May differ from user_id when a service account is used to execute the pipeline on behalf of a scientist.",
+      "type": "string",
+      "examples": ["bobby.b", "jane.doe", "svc-codeocean"]
+    },
+
+    "CO_MEMORY": {
+      "title": "Code Ocean Memory Allocation",
+      "description": "Memory allocated to the Code Ocean computation in megabytes, sourced from the CO_MEMORY environment variable. Set to 'undefined' when not running on Code Ocean.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["16384", "32768", "65536", "undefined"]
+    },
+
+    "CO_CPUS": {
+      "title": "Code Ocean CPU Allocation",
+      "description": "Number of vCPUs allocated to the Code Ocean computation, sourced from the CO_CPUS environment variable. Set to 'undefined' when not running on Code Ocean.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["2", "4", "8", "16", "undefined"]
+    },
+
+    "AWS_BATCH_JOB_ID": {
+      "title": "AWS Batch Job ID",
+      "description": "The UUID assigned to the AWS Batch job executing this workload, sourced from the AWS_BATCH_JOB_ID environment variable. Useful for correlating logs with AWS Batch console entries. Set to 'undefined' outside AWS Batch.",
+      "type": "string",
+      "default": "undefined",
+      "examples": [
+        "abc123de-f012-3456-789a-bcdef0123456",
+        "undefined"
+      ]
+    },
+
+    "AWS_BATCH_CE_NAME": {
+      "title": "AWS Batch Compute Environment",
+      "description": "The name of the AWS Batch compute environment running this job, sourced from the AWS_BATCH_CE_NAME environment variable. Set to 'undefined' outside AWS Batch.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["aind-batch-ce-cpu-spot", "aind-batch-ce-gpu-on-demand", "undefined"]
+    },
+
+    "AWS_BATCH_JQ_NAME": {
+      "title": "AWS Batch Job Queue",
+      "description": "The name of the AWS Batch job queue from which this job was dispatched, sourced from the AWS_BATCH_JQ_NAME environment variable. Set to 'undefined' outside AWS Batch.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["aind-batch-jq-default", "aind-batch-jq-gpu", "undefined"]
+    },
+
+    "AWS_BATCH_JOB_ATTEMPT": {
+      "title": "AWS Batch Job Attempt",
+      "description": "Zero-indexed attempt number for the AWS Batch job (0 = first attempt, 1 = first retry, etc.), sourced from the AWS_BATCH_JOB_ATTEMPT environment variable. Useful for diagnosing flaky jobs. Set to 'undefined' outside AWS Batch.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["0", "1", "2", "undefined"]
+    },
+
+    "AWS_METADATA_SERVICE_NUM_ATTEMPTS": {
+      "title": "AWS Metadata Service Attempts",
+      "description": "The number of attempts made by the AWS SDK to contact the EC2 instance metadata service, sourced from the AWS_METADATA_SERVICE_NUM_ATTEMPTS environment variable. Set to 'undefined' when not configured.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["1", "3", "undefined"]
+    },
+
+    "AWS_MAX_ATTEMPTS": {
+      "title": "AWS SDK Max Retry Attempts",
+      "description": "The maximum number of retry attempts the AWS SDK will make for a failing request, sourced from the AWS_MAX_ATTEMPTS environment variable. Set to 'undefined' when not configured.",
+      "type": "string",
+      "default": "undefined",
+      "examples": ["3", "5", "10", "undefined"]
+    }
+  },
+
+  "examples": [
+    {
+      "$comment": "Minimal required-only log entry",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Starting program"
+    },
+    {
+      "$comment": "Sequence of minimal JSONL-style entries (each would be one line in a .jsonl file)",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Connecting to database"
+    },
+    {
+      "$comment": "Poor log — avoid this pattern: too vague, no context",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Fail to save subject info"
+    },
+    {
+      "$comment": "Better log — specific message and contextual subject_id field",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Failed to save subject info: field 'experiment_id' is missing",
+      "subject_id": "714392"
+    },
+    {
+      "$comment": "Canonical success log — single end-of-request summary with all relevant session context",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Session recorded",
+      "subject_id": "713491",
+      "instrument_id": "frg_1_a",
+      "user_id": "bobby.b",
+      "software_name": "waterlog",
+      "software_version": "1.2.0",
+      "acquisition_name": "713491_2026-02-09_21-19-00",
+      "status": "success",
+      "database": "dataverse",
+      "wt_g": 23.93,
+      "water_earned_ml": 0.89
+    },
+    {
+      "$comment": "Canonical error log — end-of-request summary capturing a failure with error_type for programmatic filtering",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "ERROR",
+      "message": "Failed to save session: could not connect to database",
+      "subject_id": "713491",
+      "instrument_id": "frg_1_a",
+      "user_id": "bobby.b",
+      "software_name": "waterlog",
+      "software_version": "1.2.0",
+      "acquisition_name": "713491_2026-02-09_21-19-00",
+      "status": "fail",
+      "database": "dataverse",
+      "error_type": "TimeoutError",
+      "wt_g": 17.21,
+      "water_earned_ml": 1.2
+    },
+    {
+      "$comment": "Code Ocean capsule log — full set of infrastructure context fields from aind-log-utils",
+      "timestamp": "2026-02-09T21:19:24.061270Z",
+      "level": "INFO",
+      "message": "Starting",
+      "subject_id": "714392",
+      "asset_name": "ecephys_714392_2026-02-09_08-30-00",
+      "process_name": "kilosort4-capsule",
+      "hostname": "batch-worker-01",
+      "log_session": "a1b2c3d",
+      "comp_id": "co-comp-abc123def456",
+      "capsule_id": "co-capsule-xyz789",
+      "CO_MEMORY": "32768",
+      "CO_CPUS": "8",
+      "AWS_BATCH_JOB_ID": "abc123de-f012-3456-789a-bcdef0123456",
+      "AWS_BATCH_CE_NAME": "aind-batch-ce-cpu-spot",
+      "AWS_BATCH_JQ_NAME": "aind-batch-jq-default",
+      "AWS_BATCH_JOB_ATTEMPT": "0",
+      "AWS_MAX_ATTEMPTS": "3"
+    }
+  ]
+}
