@@ -85,6 +85,7 @@ The table below contains a list of common fields/labels used in AIND projects. T
 | pipeline_name    |          | Name of pipeline processing, transforming and/or QC'ing raw data                                                                                     | String                         | codeocean pipeline, airflow DAG                                  |
 | process_name     |          | Name of container processing, tranforming and/or QC'ing raw data                                                                                     | String                         | code ocean capsule                                               |
 | user_id          |          | User running software. Intended specifically for software which run experiments to indicate who is running the experiment                            | String                         |                                                                  |
+| event_type       |           | Values are `stage_start`, `stage_complete` or `stage_failure` and only injected at the start and stop of a process/application or on a failure | String  | `logging.info("Begin process...", extra={"event_type":"stage_start"})`
 
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
