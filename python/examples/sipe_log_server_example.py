@@ -8,7 +8,8 @@ CONFIG_DICT: dict[str, Any] = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "format": "%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s\n%(project)s\n%(version)s",
+            "format": "%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\
+            \n%(message)s\n%(project)s\n%(version)s",
             "()": "aind_log_utils.main.DefaultFormatter",
         },
     },
