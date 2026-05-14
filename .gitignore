@@ -138,3 +138,12 @@ dmypy.json
 
 # MacOs
 **/.DS_Store
+
+# VS Code
+.vscode/
+
+# ruff
+.ruff_cache/
+
+# vscode
+.vscode

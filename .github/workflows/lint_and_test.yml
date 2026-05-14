@@ -1,0 +1,58 @@
+name: Lint, Type Check, and Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ test-workflow ]
+  pull_request:
+    branches:
+      - main
+      - dev
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  # Lint check and Type check ran in parallel
+  lint_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v8.1.0
+      - name: Lint with Ruff
+        run: uvx ruff check
+
+  type_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.9", "3.12" ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: astral-sh/setup-uv@v8.1.0
+      - name: Type check with mypy
+        run: |
+          uv sync --all-groups
+          uv run mypy .
+
+  test_check:
+    needs: [ lint_check, type_check ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ "3.9", "3.12" ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install UV - set python version to ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Unit test with PyTest
+        run: |
+          uv sync
+          uv run pytest 

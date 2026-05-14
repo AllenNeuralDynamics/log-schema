@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AllenNeuralDynamics/aind-log-utils/main/schema/logs.json",
+  "title": "SIPE Log Entry",
+  "description": "A single structured log entry conforming to the AIND Logging Standards (https://github.com/AllenNeuralDynamics/aind-log-utils). When persisting logs to a file, use the JSON Lines format (JSONL) — one JSON object per line, no trailing comma, no surrounding array. The three fields 'timestamp', 'level', and 'message' are always required. All other properties are optional but MUST use the canonical names defined here whenever they apply. Arbitrary domain-specific fields (e.g. sensor readings, status codes, custom metrics) are allowed via additionalProperties.",
+  "x-schema-version": "1.0.0",
+  "type": "object",
+  "required": [],
+  "additionalProperties": false,
+
+  "properties": {
+    "hostname": {
+      "title": "hostname",
+      "description": "Hostname of computer.",
+      "type": "string",
+      "examples": ["w11dt000732", "SAKUMA"]
+    },
+    "software_name": {
+      "title": "Software Name",
+      "description": "Name of the software application.",
+      "type": "string",
+      "examples": ["stagewidget", "waterlog"]
+    },
+    "software_version": {
+      "title": "Software Version",
+      "description": "Version of the software application.",
+      "type": "string",
+      "examples": ["1.0.1.dev3", "4.23.2"]
+    },
+    "instrument_id": {
+      "title": "Instrument ID",
+      "description": "ID of the instrument. For SIPE owned rigs, this is aibs_comp_id which can be found as an environment variable on the rig.",
+      "type": "string",
+      "examples": ["1.0.1.dev3", "4.23.2"]
+    }
+  }
+}
