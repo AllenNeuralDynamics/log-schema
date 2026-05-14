@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - dev
+      - fix-workflow
     types: [ opened, synchronize, reopened, ready_for_review ]
 
 defaults:
