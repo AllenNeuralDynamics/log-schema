@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - fix-workflow
 
 permissions:
   contents: write # For creating tags
@@ -16,7 +15,6 @@ jobs:
     uses: AllenNeuralDynamics/.github/.github/workflows/release-bump-version-uv.yml@main
     with:
       working-directory: "python"
-      default_branch: "fix-workflow"
     secrets:
       repo-token: ${{ secrets.GITHUB_TOKEN }}
 

@@ -2,9 +2,6 @@ name: Lint, Type Check, and Test
 
 on:
   workflow_dispatch:
-  push:
-    branches: 
-      - fix-workflow
   pull_request:
     branches:
       - main
