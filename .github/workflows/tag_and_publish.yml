@@ -29,11 +29,12 @@ jobs:
       - name: Build wheel and sdist
         run: |
           cd python
+          uv version ${{ needs.tag.outputs.new_version }}
           uv build
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.tag.outputs.new_version }}
+          tag_name: v${{ needs.tag.outputs.new_version }}
           name: Release ${{ needs.tag.outputs.new_version }}
           files: python/dist/*
           body: |
