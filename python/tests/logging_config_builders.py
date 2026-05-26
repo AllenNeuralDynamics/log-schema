@@ -11,7 +11,7 @@ class ConfigBuilder:
         disable_existing_loggers: False
         formatters:
             default:
-                '()': aind_log_utils.main.DefaultFormatter
+                '()': schlog.main.DefaultFormatter
                 static_fields:
                     i-am-from-yaml: hello
         handlers:
@@ -51,7 +51,7 @@ class ConfigBuilder:
             },
         }
         if has_default_format:
-            config["formatters"]["default"]["()"] = "aind_log_utils.main.DefaultFormatter"
+            config["formatters"]["default"]["()"] = "schlog.main.DefaultFormatter"
         if has_static_fields:
             config["formatters"]["default"]["static_fields"] = {
                 "app_name": "my_app",

@@ -5,7 +5,7 @@ from unittest.mock import mock_open, patch
 import pytest
 from dateutil import parser
 
-from aind_log_utils.main import setup_logging
+from schlog.main import setup_logging
 from tests.logging_config_builders import ConfigBuilder
 from tests.logging_model_builders import LogConfigModel
 

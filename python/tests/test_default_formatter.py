@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from aind_log_utils.main import DefaultFormatter
+from schlog.main import DefaultFormatter
 from tests.logging_model_builders import LogConfigModel
 
 

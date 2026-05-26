@@ -7,10 +7,10 @@ This logging utility library utilizes [python's standard logging library](https:
 The default setup for logging adheres to the best practice guidelines described [here](https://github.com/AllenNeuralDynamics/aind-log-utils/blob/main/README.md).
 
 ```python
-import aind_log_utils
+import schlog 
 import logging
 
-aind_log_utils.setup_logging()
+schlog.setup_logging()
 logging.info("Hello")
 
 # Output: {"timestamp": "2026-04-08T22:58:22.677137Z", "level": "INFO", "message": "Hello"}
@@ -24,7 +24,7 @@ The examples directory in this project contains additional examples on other fea
 
 ## Implementation Notes
 
-- If using a custom config file, the fields in ``model`` will overwrite the static_fields set in the config **ONLY IF** the formatters explicitly reference ``aind_log_utils.DefaultFormatter`` AND contains the same field key.
+- If using a custom config file, the fields in ``model`` will overwrite the static_fields set in the config **ONLY IF** the formatters explicitly reference ``schlog.DefaultFormatter`` AND contains the same field key.
 - Each handler has its own formatter. Any additional handlers added to the root logger needs to redefine the formatter. This can easily be done by using the ``DefaultFormatter`` with the same ``model`` used for setup. Alternatively, you can make new models for different handlers.
 
     ```python
@@ -36,5 +36,5 @@ The examples directory in this project contains additional examples on other fea
 ```python
 cd python
 uv sync
-uv run src/aind_log_utils/main.py
+uv run src/schlog/main.py
 ```

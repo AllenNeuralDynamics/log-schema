@@ -34,7 +34,7 @@ examples = [
 ]
 
 [build-system]
-requires = ["uv-build>=0.1.0"]
+requires = ["uv-build>=0.1.0,<1.0.0"]
 build-backend = "uv_build"
 
 [tool.ruff]
@@ -45,7 +45,7 @@ target-version = "py312"
 select = ["E", "F", "I"] # Error, Pyflakes, Isort
 
 [tool.coverage.run]
-source = ["aind_log_utils"]
+source = ["schlog"]
 omit = ["*__init__*"]
 
 [tool.coverage.report]

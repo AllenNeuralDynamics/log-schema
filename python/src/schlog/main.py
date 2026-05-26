@@ -20,7 +20,7 @@ def _model_to_fields(model: BaseModel | dict) -> dict:
 
 
 def _get_default_config():
-    path = resources.files("aind_log_utils").joinpath("defaults/default-logging-config.yml")
+    path = resources.files("schlog").joinpath("defaults/default-logging-config.yml")
     with open(path, "r") as f:
         config = yaml.safe_load(f.read())
     return config
@@ -105,7 +105,7 @@ def setup_logging(
     if model:
         new_fields = _model_to_fields(model)
         for formatter in config.get("formatters", {}).values():
-            if formatter.get("()") == "aind_log_utils.main.DefaultFormatter":
+            if formatter.get("()") == "schlog.main.DefaultFormatter":
                 formatter.setdefault("static_fields", {}).update(new_fields)
 
     # Setup logger with configuration file

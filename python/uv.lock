@@ -8,59 +8,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "aind-log-utils"
-version = "0.2.8"
-source = { editable = "." }
-dependencies = [
-    { name = "pydantic" },
-    { name = "pydantic-settings", version = "2.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pydantic-settings", version = "2.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "python-json-logger", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "python-json-logger", version = "4.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "pyyaml" },
-    { name = "types-pyyaml", version = "6.0.12.20250915", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "types-pyyaml", version = "6.0.12.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "interrogate" },
-    { name = "mypy", version = "1.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "mypy", version = "1.20.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pytest", version = "9.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "pytest-cov" },
-    { name = "python-dateutil" },
-    { name = "ruff" },
-    { name = "types-python-dateutil", version = "2.9.0.20260124", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "types-python-dateutil", version = "2.9.0.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-]
-examples = [
-    { name = "watchtower" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.5.3" },
-    { name = "pydantic-settings", specifier = ">=2.0.3" },
-    { name = "python-json-logger", specifier = ">=3.0.1" },
-    { name = "pyyaml", specifier = ">=6.0.1" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.12" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "interrogate", specifier = ">=1.5.0" },
-    { name = "mypy", specifier = ">=1.4.1" },
-    { name = "pytest", specifier = ">=7.4.4" },
-    { name = "pytest-cov", specifier = ">=4.1.0" },
-    { name = "python-dateutil", specifier = ">=2.9.0.post0" },
-    { name = "ruff", specifier = ">=0.15.12" },
-    { name = "types-python-dateutil", specifier = ">=2.8.19.14" },
-]
-examples = [{ name = "watchtower", specifier = ">=3.1.0" }]
-
-[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1178,6 +1125,59 @@ sdist = { url = "https://files.pythonhosted.org/packages/9b/ec/7c692cde9125b77e8
 wheels = [
     { url = "https://files.pythonhosted.org/packages/87/72/c6c32d2b657fa3dad1de340254e14390b1e334ce38268b7ad51abda3c8c2/s3transfer-0.17.0-py3-none-any.whl", hash = "sha256:ce3801712acf4ad3e89fb9990df97b4972e93f4b3b0004d214be5bce12814c20", size = 86811, upload-time = "2026-04-29T22:07:34.966Z" },
 ]
+
+[[package]]
+name = "schlog"
+version = "0.2.8"
+source = { editable = "." }
+dependencies = [
+    { name = "pydantic" },
+    { name = "pydantic-settings", version = "2.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pydantic-settings", version = "2.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "python-json-logger", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "python-json-logger", version = "4.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pyyaml" },
+    { name = "types-pyyaml", version = "6.0.12.20250915", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "types-pyyaml", version = "6.0.12.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "interrogate" },
+    { name = "mypy", version = "1.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "mypy", version = "1.20.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest", version = "9.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytest-cov" },
+    { name = "python-dateutil" },
+    { name = "ruff" },
+    { name = "types-python-dateutil", version = "2.9.0.20260124", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "types-python-dateutil", version = "2.9.0.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+examples = [
+    { name = "watchtower" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.5.3" },
+    { name = "pydantic-settings", specifier = ">=2.0.3" },
+    { name = "python-json-logger", specifier = ">=3.0.1" },
+    { name = "pyyaml", specifier = ">=6.0.1" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.12" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "interrogate", specifier = ">=1.5.0" },
+    { name = "mypy", specifier = ">=1.4.1" },
+    { name = "pytest", specifier = ">=7.4.4" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "python-dateutil", specifier = ">=2.9.0.post0" },
+    { name = "ruff", specifier = ">=0.15.12" },
+    { name = "types-python-dateutil", specifier = ">=2.8.19.14" },
+]
+examples = [{ name = "watchtower", specifier = ">=3.1.0" }]
 
 [[package]]
 name = "six"
