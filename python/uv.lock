@@ -1128,7 +1128,7 @@ wheels = [
 
 [[package]]
 name = "schlog"
-version = "0.2.10.dev0"
+version = "0.2.10.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
