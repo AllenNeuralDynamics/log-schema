@@ -3,7 +3,7 @@ version: 1
 disable_existing_loggers: false
 formatters:
   default:
-    "()": schlog.main.DefaultFormatter
+    "()": log_schema.main.DefaultFormatter
     static_fields:
       configure_by: file
 

@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from schlog import setup_logging
+from log_schema import setup_logging
 
 CONFIG_DICT: dict[str, Any] = {
     "version": 1,
@@ -10,7 +10,7 @@ CONFIG_DICT: dict[str, Any] = {
         "default": {
             "format": "%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\
             \n%(message)s\n%(project)s\n%(version)s",
-            "()": "schlog.main.DefaultFormatter",
+            "()": "log_schema.main.DefaultFormatter",
         },
     },
     "handlers": {

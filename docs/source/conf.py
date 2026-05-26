@@ -10,7 +10,7 @@ from datetime import date
 from os.path import abspath, dirname
 from pathlib import Path
 
-from schlog import __version__ as package_version
+from log_schema import __version__ as package_version
 
 INSTITUTE_NAME = "Allen Institute for Neural Dynamics"
 

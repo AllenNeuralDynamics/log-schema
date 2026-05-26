@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from schlog import DefaultFormatter, setup_logging
+from log_schema import DefaultFormatter, setup_logging
 
 CONFIG_PATH = Path(__file__).resolve().parent / "configs" / "config.yml"
 CONFIG_DICT: dict[str, Any] = {
@@ -12,7 +12,7 @@ CONFIG_DICT: dict[str, Any] = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "schlog.main.DefaultFormatter",
+            "()": "log_schema.main.DefaultFormatter",
             "static_fields": {"configure_by": "dictionary"},
         },
     },
@@ -42,7 +42,7 @@ CONFIG_DICT: dict[str, Any] = {
 
 def setup_default():
     setup_logging()
-    logging.info("Basic example of logging with schlog!")
+    logging.info("Basic example of logging with log_schema!")
 
 
 ################################################################################

@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from schlog import setup_logging
+from log_schema import setup_logging
 
 CONFIG_PATH = Path(__file__).resolve().parent / "configs" / "micestro.yml"
 

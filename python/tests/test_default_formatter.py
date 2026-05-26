@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from schlog.main import DefaultFormatter
+from log_schema.main import DefaultFormatter
 from tests.logging_model_builders import LogConfigModel
 
 
