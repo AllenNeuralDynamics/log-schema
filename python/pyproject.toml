@@ -1,5 +1,5 @@
 [project]
-name = "aind-log-utils"
+name = "schlog"
 version = "0.2.8"
 description = "General purpose logging utility library"
 readme = "README.md"
