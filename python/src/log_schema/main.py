@@ -26,6 +26,17 @@ def _get_default_config():
     return config
 
 
+def _get_default_cloudwatch_config():
+    "Load the bundled default-plus-CloudWatch logging config."
+    
+    path = resources.files("log_schema").joinpath(
+        "defaults/default-cloudwatch-logging-config.yml"
+    )
+    with open(path, "r") as f:
+        config = yaml.safe_load(f.read())
+    return config
+
+
 class DefaultFormatter(log_json.JsonFormatter):
     def __init__(self, *args, model: dict | BaseModel | None = None, **kwargs):
         if not args and "fmt" not in kwargs:

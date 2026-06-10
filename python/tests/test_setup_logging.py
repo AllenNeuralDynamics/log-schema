@@ -5,9 +5,17 @@ from unittest.mock import mock_open, patch
 import pytest
 from dateutil import parser
 
-from log_schema.main import setup_logging
+from log_schema.main import _get_default_cloudwatch_config, setup_logging
 from tests.logging_config_builders import ConfigBuilder
 from tests.logging_model_builders import LogConfigModel
+
+
+def test_get_default_cloudwatch_config():
+    config = _get_default_cloudwatch_config()
+
+    assert isinstance(config, dict)
+    assert config["formatters"]["default"]["()"] == "log_schema.main.DefaultFormatter"
+    assert "cloudwatch" in config["handlers"]
 
 
 def test_setup_logging_defaults(capsys):

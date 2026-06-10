@@ -552,6 +552,11 @@ dependencies = [
     { name = "types-pyyaml", version = "6.0.12.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 
+[package.optional-dependencies]
+cloudwatch = [
+    { name = "watchtower" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "interrogate" },
@@ -576,7 +581,9 @@ requires-dist = [
     { name = "python-json-logger", specifier = ">=3.0.1" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "types-pyyaml", specifier = ">=6.0.12.12" },
+    { name = "watchtower", marker = "extra == 'cloudwatch'", specifier = ">=3.1.0" },
 ]
+provides-extras = ["cloudwatch"]
 
 [package.metadata.requires-dev]
 dev = [
