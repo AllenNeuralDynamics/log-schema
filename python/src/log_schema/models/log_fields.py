@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -21,17 +23,17 @@ class LogFields(BaseModel):
     ... ))
     """
 
-    acquisition_name: str
-    hostname: str | None = None
-    software_name: str | None = None
-    software_version: str | None = None
-    rig_id: str | None = None
-    instrument_id: str | None = None
-    subject_id: str | None = None
-    specimen_id: str | None = None
-    pipeline_name: str | None = None
-    process_name: str | None = None
-    user_id: str | None = None
+    acquisition_name: str # required
+    hostname: Optional[str] = None
+    software_name: Optional[str] = None
+    software_version: Optional[str] = None
+    rig_id: Optional[str] = None
+    instrument_id: Optional[str] = None
+    subject_id: Optional[str] = None
+    specimen_id: Optional[str] = None
+    pipeline_name: Optional[str] = None
+    process_name: Optional[str] = None
+    user_id: Optional[str] = None
 
     model_config = {
         "extra": "allow",
