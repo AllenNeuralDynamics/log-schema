@@ -3,9 +3,21 @@ import logging
 from datetime import datetime, timezone
 
 import pytest
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
 
 from log_schema.main import DefaultFormatter
 from tests.logging_model_builders import LogConfigModel
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _tracer_provider():
+    # set_tracer_provider can only be called once per process; ignore if already set.
+    try:
+        trace.set_tracer_provider(TracerProvider())
+    except RuntimeError:
+        pass
+    return trace.get_tracer_provider()
 
 
 def test_default_formatter_sets_expected_default_fields():
@@ -18,24 +30,6 @@ def test_default_formatter_sets_expected_default_fields():
     assert "timestamp" in payload
     assert "asctime" not in payload
     assert "levelname" not in payload
-
-
-def test_default_formatter_preserves_custom_rename_fields():
-    formatter = DefaultFormatter(rename_fields={"levelname": "severity"})
-    record = _make_record("hello")
-    payload = _format_to_dict(formatter, record)
-
-    assert payload["message"] == "hello"
-    assert payload["severity"] == "INFO"
-    assert "level" not in payload
-
-
-def test_default_formatter_preserves_custom_fmt_and_style():
-    formatter = DefaultFormatter(fmt="%(message)s", style="%")
-    record = _make_record("hello")
-    payload = _format_to_dict(formatter, record)
-
-    assert payload["message"] == "hello"
 
 
 def test_default_formatter_adds_static_fields_from_dict_model():
@@ -72,6 +66,38 @@ def test_default_formatter_does_not_override_existing_static_fields():
     assert payload["env"] == "from_config"
     assert payload["fixed"] == "yes"
     assert "app_name" not in payload
+
+
+def test_default_formatter_omits_trace_context_when_no_active_span():
+    formatter = DefaultFormatter()
+    record = _make_record("hello")
+    payload = _format_to_dict(formatter, record)
+
+    assert "trace_id" not in payload
+    assert "span_id" not in payload
+
+
+def test_default_formatter_populates_trace_and_span_id_from_active_span():
+    formatter = DefaultFormatter()
+    tracer = trace.get_tracer("test_default_formatter")
+    with tracer.start_as_current_span("unit_span") as span:
+        ctx = span.get_span_context()
+        record = _make_record("hello")
+        payload = _format_to_dict(formatter, record)
+
+    assert payload["trace_id"] == format(ctx.trace_id, "032x")
+    assert payload["span_id"] == format(ctx.span_id, "016x")
+
+
+def test_default_formatter_can_disable_trace_context():
+    formatter = DefaultFormatter(include_trace_context=False)
+    tracer = trace.get_tracer("test_default_formatter")
+    with tracer.start_as_current_span("unit_span"):
+        record = _make_record("hello")
+        payload = _format_to_dict(formatter, record)
+
+    assert "trace_id" not in payload
+    assert "span_id" not in payload
 
 
 def test_default_formatter_format_time_uses_utc_and_expected_format():

@@ -11,6 +11,9 @@ classifiers = [
 ]
 
 dependencies = [
+    "opentelemetry-api>=1.41.1",
+    "opentelemetry-distro>=0.62b1",
+    "opentelemetry-sdk>=1.41.1",
     "pydantic>=2.5.3",
     "pydantic-settings>=2.0.3",
     "python-json-logger>=3.0.1",

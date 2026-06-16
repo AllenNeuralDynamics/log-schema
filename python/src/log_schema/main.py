@@ -5,10 +5,16 @@ import logging
 import logging.config
 from datetime import datetime, timezone
 from logging import LogRecord
+from typing import Any
 
 import yaml
+from opentelemetry import trace
 from pydantic import BaseModel
 from pythonjsonlogger import json as log_json
+
+# OTel uses INVALID_SPAN (all-zero IDs) when no span is active; skip those.
+_INVALID_TRACE_ID = 0
+_INVALID_SPAN_ID = 0
 
 
 def _model_to_fields(model: BaseModel | dict) -> dict:
@@ -27,7 +33,13 @@ def _get_default_config():
 
 
 class DefaultFormatter(log_json.JsonFormatter):
-    def __init__(self, *args, model: dict | BaseModel | None = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        model: dict | BaseModel | None = None,
+        include_trace_context: bool = True,
+        **kwargs,
+    ):
         if not args and "fmt" not in kwargs:
             kwargs["fmt"] = "{asctime}{levelname}{message}"
             kwargs["style"] = "{"
@@ -66,6 +78,24 @@ class DefaultFormatter(log_json.JsonFormatter):
         if "static_fields" not in kwargs and model:
             kwargs["static_fields"] = _model_to_fields(model)
         super().__init__(*args, **kwargs)
+        self.include_trace_context = include_trace_context
+
+    def add_fields(
+        self,
+        log_record: dict[str, Any],
+        record: LogRecord,
+        message_dict: dict[str, Any],
+    ) -> None:
+        super().add_fields(log_record, record, message_dict)
+        if not self.include_trace_context:
+            return
+        span_context = trace.get_current_span().get_span_context()
+        if span_context.trace_id == _INVALID_TRACE_ID:
+            return
+        # Format as hex per OpenTelemetry log data model.
+        log_record.setdefault("trace_id", format(span_context.trace_id, "032x"))
+        if span_context.span_id != _INVALID_SPAN_ID:
+            log_record.setdefault("span_id", format(span_context.span_id, "016x"))
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
         """
