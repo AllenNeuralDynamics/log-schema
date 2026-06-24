@@ -3,8 +3,8 @@ import logging
 import pytest
 from pydantic import ValidationError
 
-from log_schema.main import setup_logging
 from log_schema.models import LogFields
+from log_schema.main import setup_logging
 
 
 def test_log_fields_drops_none():

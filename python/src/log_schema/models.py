@@ -1,8 +1,21 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
+
+
+class EventType(str, Enum):
+    """Canonical event_type values (AIND logging standard).
+
+    Per-event field: pass via the log call's extra, e.g.
+    logging.info("starting", extra={"event_type": EventType.STAGE_START}).
+    """
+
+    STAGE_START = "stage_start"
+    STAGE_COMPLETE = "stage_complete"
+    STAGE_FAILURE = "stage_failure"
 
 
 class LogFields(BaseModel):
@@ -23,7 +36,7 @@ class LogFields(BaseModel):
     ... ))
     """
 
-    acquisition_name: str # required
+    acquisition_name: str  # required
     hostname: Optional[str] = None
     software_name: Optional[str] = None
     software_version: Optional[str] = None

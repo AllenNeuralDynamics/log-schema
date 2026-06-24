@@ -20,16 +20,17 @@ def _model_to_fields(model: BaseModel | dict) -> dict:
 
 
 def _get_default_config():
-    path = resources.files("log_schema").joinpath("defaults/default-logging-config.yml")
+    path = resources.files("log_schema").joinpath("default-logging-config.yml")
     with open(path, "r") as f:
         config = yaml.safe_load(f.read())
     return config
 
 
 class DefaultFormatter(log_json.JsonFormatter):
-    def __init__(self, *args, model: dict | BaseModel | None = None, **kwargs):
+    def __init__(self, *args, model: BaseModel | None = None, **kwargs):
         if not args and "fmt" not in kwargs:
             kwargs["fmt"] = "{asctime}{levelname}{message}"
+        if not args and "style" not in kwargs:
             kwargs["style"] = "{"
         if "reserved_attrs" not in kwargs:
             kwargs["reserved_attrs"] = [
@@ -65,6 +66,8 @@ class DefaultFormatter(log_json.JsonFormatter):
             }
         if "static_fields" not in kwargs and model:
             kwargs["static_fields"] = _model_to_fields(model)
+        if model:
+            self.model = model
         super().__init__(*args, **kwargs)
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
