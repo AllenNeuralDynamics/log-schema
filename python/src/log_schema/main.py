@@ -93,9 +93,10 @@ class DefaultFormatter(log_json.JsonFormatter):
     def format(self, record: LogRecord) -> str:
         for key, value in self.dynamic_fields.items():
             if (
-                key not in dir(record)
-                and key not in key not in self.static_fields
-                and key not in self.reserved_attrs
+                key not in dir(record) and
+                key not in self.static_fields and
+                key not in self.reserved_attrs and
+                key not in list(self.rename_fields.values())
             ):
                 setattr(record, key, value)
         return super().format(record)
