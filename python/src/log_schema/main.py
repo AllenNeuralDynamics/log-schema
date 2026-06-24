@@ -66,8 +66,7 @@ class DefaultFormatter(log_json.JsonFormatter):
             }
         if "static_fields" not in kwargs and model:
             kwargs["static_fields"] = _model_to_fields(model)
-        if model:
-            self.model = model
+        self.model = model
         super().__init__(*args, **kwargs)
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
@@ -87,11 +86,26 @@ class DefaultFormatter(log_json.JsonFormatter):
         dt = datetime.fromtimestamp(record.created, tz=timezone.utc)
         return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
+    @property
+    def dynamic_fields(self) -> dict:
+        return self.model.model_dump(exclude_none=True) if self.model else {}
+
+    def format(self, record: LogRecord) -> str:
+        for key, value in self.dynamic_fields.items():
+            if (
+                key not in dir(record)
+                and key not in key not in self.static_fields
+                and key not in self.reserved_attrs
+            ):
+                setattr(record, key, value)
+        return super().format(record)
+
 
 def setup_logging(
     path_to_config: str | None = None,
     config: dict | None = None,
-    model: BaseModel | dict | None = None,
+    model: BaseModel | None = None,
+    static_fields: dict | None = None,
 ):
     if path_to_config:
         try:
@@ -105,11 +119,19 @@ def setup_logging(
     if config is None:
         config = _get_default_config()
 
-    if model:
-        new_fields = _model_to_fields(model)
+    # TODO: test with static_fields from a model_dump
+    # (how does it handle nested objects and custom types)
+    if static_fields:
         for formatter in config.get("formatters", {}).values():
             if formatter.get("()") == "log_schema.main.DefaultFormatter":
-                formatter.setdefault("static_fields", {}).update(new_fields)
+                formatter.setdefault("static_fields", {}).update(static_fields)
 
     # Setup logger with configuration file
     logging.config.dictConfig(config)
+
+    # Add model to handlers with DefaultFormatter
+    # DefaultFormatter has logic to dynamically generate fields from the model object
+    if model:
+        for handler in logging.getLogger().handlers:
+            if handler and isinstance(handler.formatter, DefaultFormatter):
+                handler.formatter.model = model
