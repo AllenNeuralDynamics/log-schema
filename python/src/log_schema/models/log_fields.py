@@ -25,6 +25,7 @@ class LogFields(BaseModel):
 
     acquisition_name: str # required
     hostname: Optional[str] = None
+    event_type: Optional[EventType] = None
     software_name: Optional[str] = None
     software_version: Optional[str] = None
     rig_id: Optional[str] = None
