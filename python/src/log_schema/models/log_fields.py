@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from log_schema.models.event_type import EventType
 
 class LogFields(BaseModel):
     """Canonical contextual log fields (AIND logging standard).
