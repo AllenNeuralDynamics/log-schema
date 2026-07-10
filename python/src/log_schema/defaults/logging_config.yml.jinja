@@ -1,0 +1,67 @@
+{# Declare expected variables and their default values #}
+{% set log_file = log_file | default(None) %}
+{% set json_log_file = json_log_file | default(none) %}
+
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  human:
+    {# "()": logging.Formatter #}
+    "()": log_schema.log_schema_utils.HumanFormatterWithExtras
+    datefmt: '%m/%d/%Y %I:%M:%S %p'
+    "fmt": "%(asctime)s %(levelname)s %(message)s"
+  json_simple: # omits all the log record fields except for timestamp, level, and message
+    "()": pythonjsonlogger.jsonlogger.JsonFormatter
+    "fmt": "%(asctime)s %(levelname)s %(message)s"
+    "rename_fields": { "asctime": "timestamp", "levelname": "level" }
+    "timestamp": true
+  json:
+    "()": pythonjsonlogger.jsonlogger.JsonFormatter
+    "fmt": "%(asctime)s %(levelname)s %(message)s"
+    "rename_fields": { "asctime": "timestamp", "levelname": "level" }
+    "timestamp": true
+    "reserved_attrs": ["msg"]
+handlers:
+  console_human:
+    class: logging.StreamHandler
+    formatter: human
+    level: INFO
+    stream: ext://sys.stdout
+  console_simple_json:
+    class: logging.StreamHandler
+    formatter: json_simple
+    level: INFO
+    stream: ext://sys.stdout
+  console_json:
+    class: logging.StreamHandler
+    formatter: json
+    level: INFO
+    stream: ext://sys.stdout
+{% if json_log_file is not none %}
+  json_file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: json
+    level: INFO
+    filename: {{ json_log_file }}
+{% endif %}
+{% if log_file is not none %}
+  log_file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: human
+    level: INFO
+    filename: {{ log_file }}
+{% endif %}
+loggers:
+  "":
+    handlers:
+      - console_human
+      - console_simple_json
+      {% if json_log_file is not none %}
+      - json_file
+      {% endif %}
+      {% if log_file is not none %}
+      - log_file
+      {% endif %}
+    level: INFO
+    propagate: true
