@@ -5,9 +5,123 @@ from unittest.mock import mock_open, patch
 import pytest
 from dateutil import parser
 
-from log_schema.main import setup_logging
+from log_schema.main import (
+    _get_default_cloudwatch_config,
+    _uses_cloudwatch,
+    _without_cloudwatch,
+    setup_logging,
+)
 from tests.logging_config_builders import ConfigBuilder
 from tests.logging_model_builders import LogConfigModel
+
+
+def test_get_default_cloudwatch_config():
+    config = _get_default_cloudwatch_config()
+
+    assert isinstance(config, dict)
+    assert config["formatters"]["default"]["()"] == "log_schema.main.DefaultFormatter"
+    assert "cloudwatch" in config["handlers"]
+
+
+def test_uses_cloudwatch_detection():
+    """_uses_cloudwatch flags CloudWatch configs and ignores others."""
+    assert _uses_cloudwatch(_get_default_cloudwatch_config()) is True
+    assert _uses_cloudwatch(ConfigBuilder().get_config_dict(True, False)) is False
+    assert _uses_cloudwatch("not a dict") is False
+
+
+def test_without_cloudwatch_removes_handler_and_references():
+    """_without_cloudwatch drops CloudWatch handlers and logger references."""
+    stripped = _without_cloudwatch(_get_default_cloudwatch_config())
+
+    assert "cloudwatch" not in stripped["handlers"]
+    assert "console" in stripped["handlers"]
+    assert "cloudwatch" not in stripped["loggers"][""]["handlers"]
+    assert "console" in stripped["loggers"][""]["handlers"]
+
+
+def test_without_cloudwatch_handles_root_key():
+    """_without_cloudwatch also strips CloudWatch refs from a 'root' logger."""
+    config = {
+        "version": 1,
+        "handlers": {
+            "console": {"class": "logging.StreamHandler"},
+            "cloudwatch": {"class": "watchtower.CloudWatchLogHandler"},
+        },
+        "root": {"handlers": ["console", "cloudwatch"], "level": "INFO"},
+    }
+    stripped = _without_cloudwatch(config)
+
+    assert "cloudwatch" not in stripped["handlers"]
+    assert stripped["root"]["handlers"] == ["console"]
+
+
+def test_use_cloudwatch_selects_cloudwatch_config():
+    """use_cloudwatch=True selects the bundled console+CloudWatch config."""
+    captured = {}
+
+    def fake_dict_config(cfg):
+        captured["config"] = cfg
+
+    with patch("logging.config.dictConfig", fake_dict_config):
+        setup_logging(use_cloudwatch=True)
+
+    assert "cloudwatch" in captured["config"]["handlers"]
+
+
+def test_default_selects_console_only_config():
+    """Without use_cloudwatch, the console-only default config is selected."""
+    captured = {}
+
+    def fake_dict_config(cfg):
+        captured["config"] = cfg
+
+    with patch("logging.config.dictConfig", fake_dict_config):
+        setup_logging()
+
+    assert "cloudwatch" not in captured["config"]["handlers"]
+
+
+def test_cloudwatch_handler_failure_falls_back_to_console(capsys):
+    """A CloudWatch handler that can't initialize degrades to console-only
+    logging instead of raising (e.g. no AWS credentials outside CO)."""
+    config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {"default": {"()": "log_schema.main.DefaultFormatter"}},
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "default",
+                "level": "INFO",
+                "stream": "ext://sys.stdout",
+            },
+            # Non-importable module → handler init fails during dictConfig,
+            # but the name flags it as a CloudWatch handler so we degrade
+            # rather than raise. Deterministic without watchtower/AWS.
+            "cloudwatch": {
+                "class": "watchtower_unavailable.CloudWatchLogHandler",
+                "formatter": "default",
+                "level": "INFO",
+            },
+        },
+        "loggers": {
+            "": {
+                "handlers": ["console", "cloudwatch"],
+                "level": "INFO",
+                "propagate": True,
+            }
+        },
+    }
+
+    # Must not raise
+    setup_logging(config=config)
+    logging.info("Test log message")
+
+    lines = capsys.readouterr().out.strip().split("\n")
+    entries = [json.loads(line) for line in lines if line.strip()]
+    messages = [entry.get("message") for entry in entries]
+    assert "Test log message" in messages
 
 
 def test_setup_logging_defaults(capsys):
