@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib.resources as resources
 import logging
 import logging.config
@@ -96,11 +97,73 @@ class DefaultFormatter(log_json.JsonFormatter):
         return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+def _apply_model(config: dict, model: BaseModel | dict) -> None:
+    "Inject model fields as static_fields on every DefaultFormatter."
+    new_fields = _model_to_fields(model)
+    for formatter in config.get("formatters", {}).values():
+        if formatter.get("()") == "log_schema.main.DefaultFormatter":
+            formatter.setdefault("static_fields", {}).update(new_fields)
+
+
+def _uses_cloudwatch(config) -> bool:
+    "Return True if any handler in config is a CloudWatch/watchtower handler."
+    if not isinstance(config, dict):
+        return False
+    for handler in config.get("handlers", {}).values():
+        handler_class = str(handler.get("class", ""))
+        if "watchtower" in handler_class or "CloudWatch" in handler_class:
+            return True
+    return False
+
+
+def _without_cloudwatch(config: dict) -> dict:
+    "Return a copy of config with CloudWatch/watchtower handlers removed."
+    stripped = copy.deepcopy(config)
+    cloudwatch_handlers = {
+        name
+        for name, handler in stripped.get("handlers", {}).items()
+        if "watchtower" in str(handler.get("class", ""))
+        or "CloudWatch" in str(handler.get("class", ""))
+    }
+    for name in cloudwatch_handlers:
+        stripped["handlers"].pop(name, None)
+    scopes = list(stripped.get("loggers", {}).values())
+    if "root" in stripped:
+        scopes.append(stripped["root"])
+    for scope in scopes:
+        if "handlers" in scope:
+            scope["handlers"] = [
+                h for h in scope["handlers"] if h not in cloudwatch_handlers
+            ]
+    return stripped
+
+
 def setup_logging(
     path_to_config: str | None = None,
     config: dict | None = None,
     model: BaseModel | dict | None = None,
+    use_cloudwatch: bool = False,
 ):
+    """Configure the root logger from a file, dict, or bundled default.
+
+    Parameters
+    ----------
+    path_to_config : str, optional
+        Path to a YAML logging config. If it cannot be read, the bundled
+        default is used instead.
+    config : dict, optional
+        A logging config dict, used when ``path_to_config`` is not given.
+    model : BaseModel or dict, optional
+        Static fields injected onto every ``DefaultFormatter`` (e.g. an
+        acquisition/process name attached to every log record).
+    use_cloudwatch : bool, default False
+        When neither ``path_to_config`` nor ``config`` is supplied, select
+        the bundled console+CloudWatch config instead of console-only, so
+        consumers get CloudWatch logging without shipping their own YAML.
+        If the CloudWatch handler cannot be initialized (e.g. no AWS
+        credentials outside Code Ocean), logging degrades to console only
+        rather than raising.
+    """
     if path_to_config:
         try:
             with open(path_to_config, "r") as f:
@@ -111,13 +174,27 @@ def setup_logging(
             print("config is invalid, using defaults")
 
     if config is None:
-        config = _get_default_config()
+        config = (
+            _get_default_cloudwatch_config()
+            if use_cloudwatch
+            else _get_default_config()
+        )
 
     if model:
-        new_fields = _model_to_fields(model)
-        for formatter in config.get("formatters", {}).values():
-            if formatter.get("()") == "log_schema.main.DefaultFormatter":
-                formatter.setdefault("static_fields", {}).update(new_fields)
+        _apply_model(config, model)
 
     # Setup logger with configuration file
-    logging.config.dictConfig(config)
+    try:
+        logging.config.dictConfig(config)
+    except ValueError:
+        # A handler failed to initialize. If it is a CloudWatch handler
+        # (commonly missing AWS credentials outside Code Ocean), degrade to
+        # console-only logging instead of crashing the program. Any other
+        # invalid-config error is re-raised.
+        if not _uses_cloudwatch(config):
+            raise
+        logging.config.dictConfig(_without_cloudwatch(config))
+        logging.warning(
+            "CloudWatch logging handler could not be initialized; "
+            "falling back to console logging."
+        )
