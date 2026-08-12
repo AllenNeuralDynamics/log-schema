@@ -38,3 +38,45 @@ cd python
 uv sync
 uv run src/log_schema/main.py
 ```
+
+
+
+# Notes
+
+How do we handle dictConfig?
+
+precedence (models + resources) > dictConfig static fields
+
+``setup_logging``
+
+- Creates ConsoleHandler with following feature: 
+    - static fields provided by a model
+    - json formatted 
+- Creates FileHandler with following feature: 
+    - static fields provided by a model
+    - json formatted 
+
+``setup_logging_with_otel``
+
+- Provision resource with attributes
+- Creates OtelHandler:
+    - static fields provided by model
+- Creates ConsoleHandler with following feature: 
+    - static fields provided by model & resource
+    - json formatted 
+- Creates FileHandler with following feature: 
+    - static fields provided by model & resource
+    - json formatted 
+
+Additional models?
+
+- API exposes all models
+- all lazy imports
+
+Additional handlers?
+
+- API exposes all handlers
+- again lazy imports
+
+## Extract variables
+

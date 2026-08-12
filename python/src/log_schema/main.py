@@ -140,3 +140,4 @@ def setup_logging(
 
     # Setup logger with configuration file
     logging.config.dictConfig(config)
+
