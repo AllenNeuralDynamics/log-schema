@@ -25,6 +25,7 @@ The examples directory in this project contains additional examples on other fea
 ## Implementation Notes
 
 - If using a custom config file, the fields in ``model`` will overwrite the static_fields set in the config **ONLY IF** the formatters explicitly reference ``schlog.DefaultFormatter`` AND contains the same field key.
+- To print only some fields (e.g. readable stdout) instead of JSON, set ``stdout_fields`` on the formatter in the config, e.g. ``stdout_fields: [timestamp, message]`` prints ``<timestamp> - <message>``. Use a separate formatter/handler for JSON file output.
 - Each handler has its own formatter. Any additional handlers added to the root logger needs to redefine the formatter. This can easily be done by using the ``DefaultFormatter`` with the same ``model`` used for setup. Alternatively, you can make new models for different handlers.
 
     ```python
