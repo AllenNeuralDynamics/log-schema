@@ -27,7 +27,14 @@ def _get_default_config():
 
 
 class DefaultFormatter(log_json.JsonFormatter):
-    def __init__(self, *args, model: dict | BaseModel | None = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        model: dict | BaseModel | None = None,
+        stdout_fields: list[str] | None = None,
+        **kwargs,
+    ):
+        self.stdout_fields = stdout_fields
         if not args and "fmt" not in kwargs:
             kwargs["fmt"] = "{asctime}{levelname}{message}"
             kwargs["style"] = "{"
@@ -66,6 +73,15 @@ class DefaultFormatter(log_json.JsonFormatter):
         if "static_fields" not in kwargs and model:
             kwargs["static_fields"] = _model_to_fields(model)
         super().__init__(*args, **kwargs)
+
+    def jsonify_log_record(self, log_data) -> str:
+        if not self.stdout_fields:
+            return super().jsonify_log_record(log_data)
+        parts = [str(log_data[f]) for f in self.stdout_fields if f in log_data]
+        text = " - ".join(parts)
+        if "exc_info" in log_data and "exc_info" not in self.stdout_fields:
+            text += "\n" + str(log_data["exc_info"])  # never drop tracebacks
+        return text
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
         """

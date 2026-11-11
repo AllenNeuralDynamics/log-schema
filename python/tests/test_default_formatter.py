@@ -86,6 +86,35 @@ def test_default_formatter_format_time_uses_utc_and_expected_format():
     assert parsed.tzinfo == timezone.utc
 
 
+def test_stdout_fields_message_only():
+    formatter = DefaultFormatter(stdout_fields=["message"])
+    assert formatter.format(_make_record("hello")) == "hello"
+
+
+def test_stdout_fields_timestamp_and_message_skips_unknown():
+    formatter = DefaultFormatter(stdout_fields=["timestamp", "nope", "message"])
+    out = formatter.format(_make_record("hello"))
+    assert out.endswith("Z - hello")
+
+
+def test_stdout_fields_can_select_static_and_extra_fields():
+    formatter = DefaultFormatter(model={"env": "prod"}, stdout_fields=["env", "message"])
+    assert formatter.format(_make_record("hello")) == "prod - hello"
+
+
+def test_stdout_fields_keeps_traceback():
+    formatter = DefaultFormatter(stdout_fields=["message"])
+    try:
+        raise ValueError("boom")
+    except ValueError:
+        import sys
+
+        record = _make_record("hello")
+        record.exc_info = sys.exc_info()
+    out = formatter.format(record)
+    assert out.startswith("hello\n") and "ValueError: boom" in out
+
+
 ################################################################################
 #
 #   Utility functions for tests
