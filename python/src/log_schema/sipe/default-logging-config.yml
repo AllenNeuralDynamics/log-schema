@@ -1,0 +1,32 @@
+---
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    "()": log_schema.DefaultFormatter
+  log_server:
+    format: '%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+    stream: ext://sys.stdout
+  sipe-logserver:
+    level: INFO
+    formatter: log_server
+    host: eng-logtools.corp.alleninstitute.org
+    port: 9000
+    class: logging.handlers.SocketHandler
+  alloy:
+    "()": log_schema.otel_log_handler
+    level: INFO
+loggers:
+  "":
+    handlers:
+      - console
+      # - sipe-logserver
+      # - alloy
+    level: INFO
+    propagate: true

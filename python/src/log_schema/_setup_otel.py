@@ -1,86 +1,95 @@
-import logging
-from typing import Any, Mapping
+from __future__ import annotations
 
 from pydantic import BaseModel
 
-from ._setup_base import setup_logging
+from ._setup_base import DefaultFormatter, _get_default_config, setup_logging
+
+
+def otel_log_handler(endpoint: str | None = None, protocol: str = "grpc"):
+    from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+
+    if protocol == "grpc":
+        from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+
+        exporter = OTLPLogExporter(endpoint=endpoint, insecure=True)
+    elif protocol == "http":
+        from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+
+        exporter = OTLPLogExporter(endpoint=endpoint)
+    else:
+        raise ValueError(f"Unsupported protocol: {protocol}")
+
+    # Not registered globally: the handler holds its own provider, so repeated setup doesn't warn.
+    logging_provider = LoggerProvider()
+    logging_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+    return LoggingHandler(logger_provider=logging_provider)
 
 
 def setup_logging_otel(
-    resource: dict | None = None,
+    resource: dict | BaseModel = {},
+    config: dict | None = None,
     model: dict | BaseModel | None = None,
     include_trace_context: bool = True,
+    console_exporter: bool = False,
+    otlp_endpoint: str = "http://localhost:4317",
 ) -> None:
-    """"""
-
     # Lazy import to make opentelemetry optional for users who don't need it
     from opentelemetry import trace
-    from opentelemetry._logs import set_logger_provider
-    from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
     from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-    from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider as TraceProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
-    OTLP_ENDPOINT = "http://localhost:4317"
 
     ################################################################################
     #
     #   Tracing Setup
     #
     ################################################################################
+    resource = resource.model_dump() if isinstance(resource, BaseModel) else resource
 
     # Setup tracing
-    trace_provider = TraceProvider(resource=Resource.create(resource or {}))
-    trace_exporter = OTLPSpanExporter(endpoint=OTLP_ENDPOINT, insecure=True)
+    trace_provider = TraceProvider(resource=Resource.create(resource))
+    trace_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True)
+
+    if console_exporter:
+        from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+        trace_provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+
     trace_provider.add_span_processor(BatchSpanProcessor(trace_exporter))
     trace.set_tracer_provider(trace_provider)
 
-    ################################################################################
-    #
-    #   Logging Setup
-    #
-    ################################################################################
+    ###
 
-    logging_provider = LoggerProvider(resource=Resource.create(resource or {}))
-    logging_provider.add_log_record_processor(
-        BatchLogRecordProcessor(OTLPLogExporter(endpoint=OTLP_ENDPOINT, insecure=True))
-    )
-    set_logger_provider(logging_provider)
+    model_dict = model.model_dump() if isinstance(model, BaseModel) else (model or {})
+    combined_model = model_dict | resource
 
-    # Custom wrapper to attach static fields defined in model
-    class StaticFieldsHandler(LoggingHandler):
-        """LoggingHandler that stamps a fixed attribute set onto every record."""
+    source_config = config if config is not None else _get_default_config()
+    config = source_config.copy()
 
-        def __init__(
-            self,
-            *,
-            static_fields: Mapping[str, Any],
-            level: int = logging.NOTSET,
-            logger_provider=None,
-        ):
-            super().__init__(level=level, logger_provider=logger_provider)
-            self._static_fields = dict(static_fields)  # copy: caller can't mutate later
+    ###
 
-        def _translate(self, record: logging.LogRecord):
-            otel_record = super()._translate(record)
-            for key, value in self._static_fields.items():
-                otel_record.attributes.setdefault(key, value)
-            return otel_record
+    formatters = source_config.get("formatters", {})
+    if isinstance(formatters, dict):
+        updated_formatters = formatters.copy()
+        for formatter_name, formatter_config in formatters.items():
+            if not isinstance(formatter_config, dict):
+                continue
+            formatter_factory = formatter_config.get("()")
+            if formatter_factory is DefaultFormatter or (
+                isinstance(formatter_factory, str)
+                and formatter_factory
+                in {
+                    "log_schema.DefaultFormatter",
+                    "log_schema._setup_base.DefaultFormatter",
+                }
+            ):
+                updated_formatter_config = formatter_config.copy()
+                updated_formatter_config["include_trace_context"] = include_trace_context
+                updated_formatters[formatter_name] = updated_formatter_config
+        config["formatters"] = updated_formatters
 
-    combined_model = (
-        model.model_dump() if isinstance(model, BaseModel) else model or {} | resource or {}
-    )
+    ###
 
-    # Setup base logging (console)
-    setup_logging(model=combined_model)
-
-    # Attach otel logging handler to root logger
-    logging.getLogger().addHandler(
-        StaticFieldsHandler(
-            static_fields=model.model_dump() if isinstance(model, BaseModel) else model or {},
-            logger_provider=logging_provider,
-        )
-    )
+    setup_logging(model=combined_model, config=config)

@@ -8,20 +8,27 @@ from logging import LogRecord
 from typing import Any
 
 import yaml
-from opentelemetry import trace
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 from pythonjsonlogger import json as log_json
 
-# OTel uses INVALID_SPAN (all-zero IDs) when no span is active; skip those.
-_INVALID_TRACE_ID = 0
-_INVALID_SPAN_ID = 0
+################################################################################
+#
+#   Utilities
+#
+################################################################################
+
+
+_FIELDS_ADAPTER = TypeAdapter(dict)
 
 
 def _model_to_fields(model: BaseModel | dict) -> dict:
+    # mode="json": OTLP can't encode datetime/UUID/Path/Enum/Decimal and drops them.
+    if isinstance(model, BaseModel):
+        return model.model_dump(mode="json", exclude_none=True)
     if isinstance(model, dict):
-        return model
-    elif isinstance(model, BaseModel):
-        return model.model_dump(exclude_none=True)
+        # mode="json": OTLP can't encode datetime/UUID/Path/Enum/Decimal and drops them.
+        fields = _FIELDS_ADAPTER.dump_python(model, mode="json")
+        return {k: v for k, v in fields.items() if v is not None}
     raise TypeError("Model must be a dict or pydantic BaseModel")
 
 
@@ -32,12 +39,39 @@ def _get_default_config():
     return config
 
 
+################################################################################
+#
+#   Logging Filters and Formatters
+#
+################################################################################
+
+
+_STATIC_FIELDS_FILTER = "log_schema_static_fields"
+
+
+class StaticFieldsFilter(logging.Filter):
+    """
+    Adds fixed fields to every LogRecord.
+    This mean all logs (new and existing) will have these fixed fields added.
+    """
+
+    def __init__(self, fields: BaseModel | dict | None = None):
+        super().__init__()
+        self.fields = _model_to_fields(fields or {})
+
+    def filter(self, record: LogRecord) -> bool:
+        for key, value in self.fields.items():
+            if not hasattr(record, key):
+                setattr(record, key, value)
+        return True
+
+
 class DefaultFormatter(log_json.JsonFormatter):
     def __init__(
         self,
         *args,
         model: dict | BaseModel | None = None,
-        include_trace_context: bool = True,
+        include_trace_context: bool = False,
         **kwargs,
     ):
         if not args and "fmt" not in kwargs:
@@ -82,22 +116,27 @@ class DefaultFormatter(log_json.JsonFormatter):
 
     def add_fields(
         self,
-        log_record: dict[str, Any],
+        log_data: dict[str, Any],
         record: LogRecord,
         message_dict: dict[str, Any],
     ) -> None:
-        super().add_fields(log_record, record, message_dict)
+        super().add_fields(log_data, record, message_dict)
+
         if not self.include_trace_context:
             return
-        span_context = trace.get_current_span().get_span_context()
-        if span_context.trace_id == _INVALID_TRACE_ID:
-            return
 
-        # TODO: remove this, i think otel auto injects trace_id and span_id into log records now, so this is redundant
-        # # Format as hex per OpenTelemetry log data model.
-        # log_record.setdefault("trace_id", format(span_context.trace_id, "032x"))
-        # if span_context.span_id != _INVALID_SPAN_ID:
-        #     log_record.setdefault("span_id", format(span_context.span_id, "016x"))
+        try:
+            from opentelemetry import trace
+        except ImportError as e:
+            raise ImportError(
+                "include_trace_context was turned on, but opentelemetry is not installed. "
+                "To integrate traces/spans install opentelemetry and use setup_logging_otel()"
+            ) from e
+
+        context = trace.get_current_span().get_span_context()
+        if context.is_valid:
+            log_data["trace_id"] = f"{context.trace_id:032x}"
+            log_data["span_id"] = f"{context.span_id:016x}"
 
     def formatTime(self, record: LogRecord, datefmt=None) -> str:
         """
@@ -117,6 +156,13 @@ class DefaultFormatter(log_json.JsonFormatter):
         return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+################################################################################
+#
+#   Main Helper Function
+#
+################################################################################
+
+
 def setup_logging(
     path_to_config: str | None = None,
     config: dict | None = None,
@@ -134,14 +180,26 @@ def setup_logging(
     if config is None:
         config = _get_default_config()
 
+    # dictConfig defaults to True, which silences loggers created before setup (e.g. at import).
+    if isinstance(config, dict):
+        config = {"disable_existing_loggers": False, **config}
+
     if model:
-        new_fields = _model_to_fields(model)
-        for formatter in config.get("formatters", {}).values():
-            if formatter.get("()") == "log_schema.main.DefaultFormatter":
-                formatter.setdefault("static_fields", {}).update(new_fields)
+        fields = _model_to_fields(model)
 
-    # Setup logger with configuration file
+        # Copy instead of mutating so the caller's config can be reused.
+        config = {
+            **config,
+            # Add static fields filter to the configuration
+            "filters": {
+                **config.get("filters", {}),
+                _STATIC_FIELDS_FILTER: {"()": StaticFieldsFilter, "fields": fields},
+            },
+            # Add filter to all handlers
+            "handlers": {
+                name: {**handler, "filters": [*handler.get("filters", []), _STATIC_FIELDS_FILTER]}
+                for name, handler in config.get("handlers", {}).items()
+            },
+        }
+
     logging.config.dictConfig(config)
-
-
-

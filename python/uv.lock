@@ -858,14 +858,6 @@ name = "log-schema"
 version = "0.2.9"
 source = { editable = "." }
 dependencies = [
-    { name = "opentelemetry-api", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "opentelemetry-api", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "opentelemetry-distro", version = "0.62b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "opentelemetry-distro", version = "0.63b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "opentelemetry-exporter-otlp", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "opentelemetry-exporter-otlp", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-    { name = "opentelemetry-sdk", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "opentelemetry-sdk", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pydantic" },
     { name = "pydantic-settings", version = "2.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "pydantic-settings", version = "2.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
@@ -876,9 +868,36 @@ dependencies = [
     { name = "types-pyyaml", version = "6.0.12.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 
+[package.optional-dependencies]
+all = [
+    { name = "opentelemetry-api", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-api", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-distro", version = "0.62b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-distro", version = "0.63b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-exporter-otlp", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-exporter-otlp", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-sdk", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-sdk", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "watchtower" },
+]
+cloudwatch = [
+    { name = "watchtower" },
+]
+otel = [
+    { name = "opentelemetry-api", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-api", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-distro", version = "0.62b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-distro", version = "0.63b1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-exporter-otlp", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-exporter-otlp", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "opentelemetry-sdk", version = "1.41.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "opentelemetry-sdk", version = "1.42.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "interrogate" },
+    { name = "log-schema", extra = ["all"] },
     { name = "mypy", version = "1.19.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "mypy", version = "1.20.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -890,25 +909,29 @@ dev = [
     { name = "types-python-dateutil", version = "2.9.0.20260408", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 examples = [
-    { name = "watchtower" },
+    { name = "log-schema", extra = ["all"] },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "opentelemetry-api", specifier = ">=1.41.1" },
-    { name = "opentelemetry-distro", specifier = ">=0.62b1" },
-    { name = "opentelemetry-exporter-otlp", specifier = ">=1.41.1" },
-    { name = "opentelemetry-sdk", specifier = ">=1.41.1" },
+    { name = "log-schema", extras = ["otel", "cloudwatch"], marker = "extra == 'all'" },
+    { name = "opentelemetry-api", marker = "extra == 'otel'", specifier = ">=1.41.1" },
+    { name = "opentelemetry-distro", marker = "extra == 'otel'", specifier = ">=0.62b1" },
+    { name = "opentelemetry-exporter-otlp", marker = "extra == 'otel'", specifier = ">=1.41.1" },
+    { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.41.1" },
     { name = "pydantic", specifier = ">=2.5.3" },
     { name = "pydantic-settings", specifier = ">=2.0.3" },
     { name = "python-json-logger", specifier = ">=3.0.1" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "types-pyyaml", specifier = ">=6.0.12.12" },
+    { name = "watchtower", marker = "extra == 'cloudwatch'", specifier = ">=3.1.0" },
 ]
+provides-extras = ["otel", "cloudwatch", "all"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "interrogate", specifier = ">=1.5.0" },
+    { name = "log-schema", extras = ["all"] },
     { name = "mypy", specifier = ">=1.4.1" },
     { name = "pytest", specifier = ">=7.4.4" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
@@ -916,7 +939,7 @@ dev = [
     { name = "ruff", specifier = ">=0.15.12" },
     { name = "types-python-dateutil", specifier = ">=2.8.19.14" },
 ]
-examples = [{ name = "watchtower", specifier = ">=3.1.0" }]
+examples = [{ name = "log-schema", extras = ["all"] }]
 
 [[package]]
 name = "mypy"

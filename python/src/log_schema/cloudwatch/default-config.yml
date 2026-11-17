@@ -3,25 +3,22 @@ version: 1
 disable_existing_loggers: false
 formatters:
   default:
-    "()": log_schema.main.DefaultFormatter
-
+    "()": log_schema.DefaultFormatter
 handlers:
   console:
     class: logging.StreamHandler
     formatter: default
     level: INFO
     stream: ext://sys.stdout
-  file:
-    class: logging.FileHandler
+  cloudwatch:
+    class: watchtower.CloudWatchLogHandler
     formatter: default
     level: INFO
-    filename: micestro.log
-
+    log_group_name: log-schema
 loggers:
   "":
     handlers:
       - console
-      - file 
+      - cloudwatch
     level: INFO
     propagate: true
-

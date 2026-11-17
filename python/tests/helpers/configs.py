@@ -11,7 +11,7 @@ class ConfigBuilder:
         disable_existing_loggers: False
         formatters:
             default:
-                '()': log_schema.main.DefaultFormatter
+                '()': log_schema.DefaultFormatter
                 static_fields:
                     i-am-from-yaml: hello
         handlers:
@@ -51,7 +51,7 @@ class ConfigBuilder:
             },
         }
         if has_default_format:
-            config["formatters"]["default"]["()"] = "log_schema.main.DefaultFormatter"
+            config["formatters"]["default"]["()"] = "log_schema.DefaultFormatter"
         if has_static_fields:
             config["formatters"]["default"]["static_fields"] = {
                 "app_name": "my_app",
