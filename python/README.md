@@ -44,6 +44,20 @@ with tracer.start_as_current_span("work"):
 - 🔗 OpenTelemetry tracing setup with trace/span IDs in logs
 - ☁️ Optional OTLP log export (`otel_log_handler`) and CloudWatch defaults (`log_schema.cloudwatch`)
 
+## Contribution
+
+Project structure:
+
+```
+log_schema/
+├── defaults/             # core default model and config file
+├── cloudwatch/           # default/config for cloudwatch support
+├── sipe/                 # default/config for SIPE logs
+├── ...                   # add new models/config in new directories
+├── _setup_base.py
+└── _setup_otel.py
+```
+
 ## 📚 Learn more
 
 - 📖 Full documentation: _coming soon (mkdocs)_
