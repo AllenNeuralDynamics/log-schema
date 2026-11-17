@@ -32,7 +32,8 @@ def setup_with_custom_fields_from_basemodel():
 # Custom fields from provided log_schema.defaults model
 def setup_with_custom_fields_from_provided_models():
     """
-    This example shows adding logging labels using a provided model from the log_schema.defaults module.
+    This example shows adding logging labels using a provided model from the log_schema.defaults
+    module.
     """
     from log_schema.defaults import AINDLogFields
 
@@ -90,7 +91,9 @@ def main():
     examples = {
         "Custom fields from dictionary": setup_with_custom_fields_from_dict,
         "Custom fields from pydantic BaseModel": setup_with_custom_fields_from_basemodel,
-        "Custom fields from provided log_schema.defaults model": setup_with_custom_fields_from_provided_models,
+        "Custom fields from provided log_schema.defaults model": (
+            setup_with_custom_fields_from_provided_models
+        ),
         "Custom fields from extras": setup_with_custom_fields_from_extras,
         "Custom fields from logging config": setup_with_custom_fields_from_logging_config,
     }

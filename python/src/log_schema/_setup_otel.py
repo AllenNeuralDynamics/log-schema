@@ -7,16 +7,21 @@ from ._setup_base import DefaultFormatter, _get_default_config, setup_logging
 
 def otel_log_handler(endpoint: str | None = None, protocol: str = "grpc"):
     from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+    from opentelemetry.sdk._logs.export import BatchLogRecordProcessor, LogRecordExporter
 
+    exporter: LogRecordExporter
     if protocol == "grpc":
-        from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+        from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
+            OTLPLogExporter as GrpcLogExporter,
+        )
 
-        exporter = OTLPLogExporter(endpoint=endpoint, insecure=True)
+        exporter = GrpcLogExporter(endpoint=endpoint, insecure=True)
     elif protocol == "http":
-        from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+        from opentelemetry.exporter.otlp.proto.http._log_exporter import (
+            OTLPLogExporter as HttpLogExporter,
+        )
 
-        exporter = OTLPLogExporter(endpoint=endpoint)
+        exporter = HttpLogExporter(endpoint=endpoint)
     else:
         raise ValueError(f"Unsupported protocol: {protocol}")
 

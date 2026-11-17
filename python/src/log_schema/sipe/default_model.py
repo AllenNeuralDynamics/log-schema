@@ -24,15 +24,15 @@ class SIPELogFields(AINDLogFields):
     ################################################################################
 
     # Add additional field where `version` = `software_version`
-    @computed_field
     @property
-    def version(self) -> str:
+    @computed_field
+    def version(self) -> Optional[str]:
         return self.software_version
 
     # Add additional field where `project` = `software_name`
-    @computed_field
     @property
-    def project(self) -> str:
+    @computed_field
+    def project(self) -> Optional[str]:
         return self.software_name
 
     # # Rename software_version to version

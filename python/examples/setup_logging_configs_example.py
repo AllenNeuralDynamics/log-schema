@@ -71,7 +71,8 @@ def setup_with_custom_config_dict():
 # Setup logging from provided custom config
 def setup_with_provided_custom_config():
     """
-    This example shows using a provided custom logging config from the defaults module to setup logging.
+    This example shows using a provided custom logging config from the defaults module to setup 
+    logging.
     """
     from log_schema.defaults import get_default_config
 

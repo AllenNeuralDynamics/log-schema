@@ -45,7 +45,7 @@ def initialize_stage():
 
 
 # Span attributes
-def wake_up_mouse(mouse_id) -> int:
+def wake_up_mouse(mouse_id):
     with tracer.start_as_current_span("wake-up-mouse", attributes={"mouse.id": mouse_id}):
         logging.info("Good morning mousey %s", mouse_id)
 
@@ -60,10 +60,10 @@ def wake_up_mouse(mouse_id) -> int:
 # Semantic Conventions from OTEL
 @tracer.start_as_current_span("server-span")
 def get_server() -> dict:
-    server = {"address": "127.0.0.1", "port": 8008}
-    trace.get_current_span().set_attribute(server_attributes.SERVER_ADDRESS, server["address"])
-    trace.get_current_span().set_attribute(server_attributes.SERVER_PORT, server["port"])
-    return server
+    address, port = "127.0.0.1", 8008
+    trace.get_current_span().set_attribute(server_attributes.SERVER_ADDRESS, address)
+    trace.get_current_span().set_attribute(server_attributes.SERVER_PORT, port)
+    return {"address": address, "port": port}
 
 
 ################################################################################

@@ -82,7 +82,8 @@ def setup_with_custom_config_dict():
 
 def setup_with_provided_custom_config():
     """
-    This example shows using a provided custom logging config from the defaults module to setup logging.
+    This example shows using a provided custom logging config from the defaults module to setup 
+    logging.
     """
     from log_schema.defaults import get_default_config
 
@@ -121,7 +122,8 @@ def setup_with_custom_fields_from_basemodel():
 
 def setup_with_custom_fields_from_provided_models():
     """
-    This example shows adding logging labels using a provided model from the log_schema.defaults module.
+    This example shows adding logging labels using a provided model from the log_schema.defaults 
+    module.
     """
     from log_schema.defaults import AINDLogFields
 
