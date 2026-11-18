@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import importlib
 import importlib.resources as resources
 import logging
 import logging.config
+import warnings
 from datetime import datetime, timezone
 from logging import LogRecord
 from typing import Any
@@ -41,29 +43,9 @@ def _get_default_config():
 
 ################################################################################
 #
-#   Logging Filters and Formatters
+#   Logging Formatters
 #
 ################################################################################
-
-
-_STATIC_FIELDS_FILTER = "log_schema_static_fields"
-
-
-class StaticFieldsFilter(logging.Filter):
-    """
-    Adds fixed fields to every LogRecord.
-    This mean all logs (new and existing) will have these fixed fields added.
-    """
-
-    def __init__(self, fields: BaseModel | dict | None = None):
-        super().__init__()
-        self.fields = _model_to_fields(fields or {})
-
-    def filter(self, record: LogRecord) -> bool:
-        for key, value in self.fields.items():
-            if not hasattr(record, key):
-                setattr(record, key, value)
-        return True
 
 
 class DefaultFormatter(log_json.JsonFormatter):
@@ -163,6 +145,34 @@ class DefaultFormatter(log_json.JsonFormatter):
 ################################################################################
 
 
+def _resolve_formatter_factory(factory: Any) -> Any:
+    """Resolve the "()" entry of a config section to a callable, or None if it can't be."""
+    if not isinstance(factory, str):
+        return factory
+    module_name, _, attr = factory.rpartition(".")
+    try:
+        return getattr(importlib.import_module(module_name), attr)
+    except (ImportError, AttributeError, ValueError):
+        return None
+
+
+def _append_static_fields(formatters: dict, fields: dict) -> dict:
+    """
+    Add `static_fields` to every DefaultFormatter (or subclass) in the config.
+    """
+    updated = {}
+    for name, entry in formatters.items():
+        factory = _resolve_formatter_factory(entry.get("()")) if isinstance(entry, dict) else None
+        if isinstance(factory, type) and issubclass(factory, DefaultFormatter):
+            existing = entry.get("static_fields")
+            if existing is None and entry.get("model"):
+                existing = _model_to_fields(entry["model"])
+            # Model fields override fields set in the config.
+            entry = {**entry, "static_fields": {**(existing or {}), **fields}}
+        updated[name] = entry
+    return updated
+
+
 def setup_logging(
     path_to_config: str | None = None,
     config: dict | None = None,
@@ -190,16 +200,7 @@ def setup_logging(
         # Copy instead of mutating so the caller's config can be reused.
         config = {
             **config,
-            # Add static fields filter to the configuration
-            "filters": {
-                **config.get("filters", {}),
-                _STATIC_FIELDS_FILTER: {"()": StaticFieldsFilter, "fields": fields},
-            },
-            # Add filter to all handlers
-            "handlers": {
-                name: {**handler, "filters": [*handler.get("filters", []), _STATIC_FIELDS_FILTER]}
-                for name, handler in config.get("handlers", {}).items()
-            },
+            "formatters": _append_static_fields(config.get("formatters", {}), fields),
         }
 
     logging.config.dictConfig(config)

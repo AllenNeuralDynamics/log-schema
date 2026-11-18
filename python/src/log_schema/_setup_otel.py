@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from ._setup_base import DefaultFormatter, _get_default_config, setup_logging
+from ._setup_base import (
+    DefaultFormatter,
+    _get_default_config,
+    _model_to_fields,
+    _resolve_formatter_factory,
+    setup_logging,
+)
 
 
 def otel_log_handler(endpoint: str | None = None, protocol: str = "grpc"):
@@ -34,7 +40,7 @@ def otel_log_handler(endpoint: str | None = None, protocol: str = "grpc"):
 def setup_logging_otel(
     resource: dict | BaseModel = {},
     config: dict | None = None,
-    model: dict | BaseModel | None = None,
+    model: dict | BaseModel = {},
     include_trace_context: bool = True,
     console_exporter: bool = False,
     otlp_endpoint: str = "http://localhost:4317",
@@ -51,7 +57,7 @@ def setup_logging_otel(
     #   Tracing Setup
     #
     ################################################################################
-    resource = resource.model_dump() if isinstance(resource, BaseModel) else resource
+    resource = _model_to_fields(resource)
 
     # Setup tracing
     trace_provider = TraceProvider(resource=Resource.create(resource))
@@ -67,7 +73,7 @@ def setup_logging_otel(
 
     ###
 
-    model_dict = model.model_dump() if isinstance(model, BaseModel) else (model or {})
+    model_dict = _model_to_fields(model)
     combined_model = model_dict | resource
 
     source_config = config if config is not None else _get_default_config()
@@ -81,14 +87,9 @@ def setup_logging_otel(
         for formatter_name, formatter_config in formatters.items():
             if not isinstance(formatter_config, dict):
                 continue
-            formatter_factory = formatter_config.get("()")
-            if formatter_factory is DefaultFormatter or (
-                isinstance(formatter_factory, str)
-                and formatter_factory
-                in {
-                    "log_schema.DefaultFormatter",
-                    "log_schema._setup_base.DefaultFormatter",
-                }
+            formatter_factory = _resolve_formatter_factory(formatter_config.get("()"))
+            if isinstance(formatter_factory, type) and issubclass(
+                formatter_factory, DefaultFormatter
             ):
                 updated_formatter_config = formatter_config.copy()
                 updated_formatter_config["include_trace_context"] = include_trace_context

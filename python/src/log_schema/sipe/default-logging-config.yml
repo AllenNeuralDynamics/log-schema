@@ -21,6 +21,7 @@ handlers:
     class: logging.handlers.SocketHandler
   alloy:
     "()": log_schema.otel_log_handler
+    formatter: default
     level: INFO
 loggers:
   "":
