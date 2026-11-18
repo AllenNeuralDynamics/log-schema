@@ -6,6 +6,13 @@ from log_schema.defaults.default_model import AINDLogFields
 
 
 class SIPELogFields(AINDLogFields):
+    acquisition_name: Optional[str] = Field(
+        default=None,
+        description=(
+            "Unique name of session defined as `<subject_id>_<acquisition-date>_<acquisition-time>`"
+        ),
+        examples=["123456_2026-01-01_23-00-00"],
+    )
     rig_id: Optional[str] = Field(
         default=None,
         description="Name of the software application",

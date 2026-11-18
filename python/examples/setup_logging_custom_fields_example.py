@@ -39,6 +39,7 @@ def setup_with_custom_fields_from_provided_models():
 
     setup_logging(
         model=AINDLogFields(
+            acquisition_name="123456_2026-01-01_23-00-00",
             software_name="test_software",
             software_version="1.0.0",
         )
