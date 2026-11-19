@@ -6,7 +6,8 @@ from log_schema.defaults.default_model import AINDLogFields
 
 
 class SIPELogFields(AINDLogFields):
-    acquisition_name: Optional[str] = Field(
+    # Intentionally widens the base `str` field to Optional so SIPE logs don't require it.
+    acquisition_name: Optional[str] = Field(  # type: ignore[assignment]
         default=None,
         description=(
             "Unique name of session defined as `<subject_id>_<acquisition-date>_<acquisition-time>`"
