@@ -12,7 +12,7 @@ CONFIG_DICT: dict[str, Any] = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "log_schema.main.DefaultFormatter",
+            "()": "log_schema.DefaultFormatter",
             "static_fields": {"configure_by": "dictionary"},
         },
     },
@@ -80,6 +80,17 @@ def setup_with_custom_config_dict():
     logging.info("This logger was configured with a custom config dict")
 
 
+def setup_with_provided_custom_config():
+    """
+    This example shows using a provided custom logging config from the defaults module to setup 
+    logging.
+    """
+    from log_schema.defaults import get_default_config
+
+    setup_logging(config=get_default_config())
+    logging.info("This logger was configured with custom default config from defaults module")
+
+
 ################################################################################
 #
 #   Custom Dynamic Fields Example
@@ -100,6 +111,7 @@ def setup_with_custom_fields_from_basemodel():
 
     By default, it will ignore empty (None) fields in the BaseModel.
     """
+
     class CustomModel(BaseModel):
         custom_field: str = "from_basemodel"
 
@@ -108,9 +120,26 @@ def setup_with_custom_fields_from_basemodel():
     logging.info("Field defined from pydantic model")
 
 
+def setup_with_custom_fields_from_provided_models():
+    """
+    This example shows adding logging labels using a provided model from the log_schema.defaults 
+    module.
+    """
+    from log_schema.defaults import AINDLogFields
+
+    setup_logging(
+        model=AINDLogFields(
+            acquisition_name="123456_2026-01-01_23-00-00",
+            software_name="test_software",
+            software_version="1.0.0",
+        )
+    )
+    logging.info("Field defined from provided model")
+
+
 def setup_with_custom_fields_from_extras():
     """
-    This example uses a dictionary to add additional logging labels. 
+    This example uses a dictionary to add additional logging labels.
     """
     setup_logging()
     logging.info("Field defined from extras", extra={"custom_field": "from_extras"})
@@ -142,8 +171,10 @@ def main():
         "Default setup": setup_default,
         "Custom config - file": setup_with_custom_config_file,
         "Custom config - dict": setup_with_custom_config_dict,
+        "Custom config - provided config": setup_with_provided_custom_config,
         "Custom fields - dict": setup_with_custom_fields_from_dict,
         "Custom fields - pydantic": setup_with_custom_fields_from_basemodel,
+        "Custom fields - provided model": setup_with_custom_fields_from_provided_models,
         "Custom extra fields": setup_with_custom_fields_from_extras,
         "Custom handler": setup_with_additional_handler,
     }

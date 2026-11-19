@@ -1,40 +1,64 @@
 # Log-Schema
 
-This logging utility library utilizes [python's standard logging library](https://docs.python.org/3/library/logging.html) and [logging.config](https://docs.python.org/3/library/logging.config.html) to help setup logging. Use the command below to easily setup logging for a project.  
+Structured JSON logging for Python, built on the standard [`logging`](https://docs.python.org/3/library/logging.html) module, with optional [OpenTelemetry](https://opentelemetry.io/) support. 
 
-## Usage
+## 📦 Install
 
-The default setup for logging adheres to the best practice guidelines described [here](https://github.com/AllenNeuralDynamics/aind-log-utils/blob/main/README.md).
+There are several versions of the package based on what you're trying to provision logging with. 
+
+```bash
+uv add log-schema                # core
+uv add "log-schema[otel]"        # + OpenTelemetry support
+uv add "log-schema[cloudwatch]"  # + CloudWatch support
+uv add "log-schema[all]"         # everything
+```
+
+## 🚀 Quick start
 
 ```python
-import log_schema 
 import logging
+import log_schema
 
-log_schema.setup_logging()
+log_schema.setup_logging(model={"software_name": "my-app"})
 logging.info("Hello")
-
-# Output: {"timestamp": "2026-04-08T22:58:22.677137Z", "level": "INFO", "message": "Hello"}
+# {"timestamp": "2026-04-08T22:58:22.677137Z", "level": "INFO", "message": "Hello", "software_name": "my-app"}
 ```
 
-The examples directory in this project contains additional examples on other features such as: 
-
-- Setup logging from a config (logging.config) 
-- Setup logging with dynamic fields 
-- Adding additional handlers with correct format
-
-## Implementation Notes
-
-- If using a custom config file, the fields in ``model`` will overwrite the static_fields set in the config **ONLY IF** the formatters explicitly reference ``log_schema.DefaultFormatter`` AND contains the same field key.
-- Each handler has its own formatter. Any additional handlers added to the root logger needs to redefine the formatter. This can easily be done by using the ``DefaultFormatter`` with the same ``model`` used for setup. Alternatively, you can make new models for different handlers.
-
-    ```python
-    new_handler.setFormatter(DefaultFormatter(models="<whatever model used for setup"))
-    ```
-
-## Local Development
+🔭 With OpenTelemetry tracing:
 
 ```python
-cd python
-uv sync
-uv run src/log_schema/main.py
+from opentelemetry import trace
+
+log_schema.setup_logging_otel(resource={"service.name": "my-app"})
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("work"):
+    logging.info("Hello")  # includes trace_id and span_id
 ```
+
+## ✨ Features
+
+- 🧾 JSON logs with ISO-8601 UTC timestamps
+- 🏷️ Static fields on every record from a `dict` or pydantic model
+- ⚙️ Bring your own `logging.config` dict or YAML file
+- 🔗 OpenTelemetry tracing setup with trace/span IDs in logs
+- ☁️ Optional OTLP log export (`otel_log_handler`) and CloudWatch defaults (`log_schema.cloudwatch`)
+
+## Contribution
+
+Project structure:
+
+```
+log_schema/
+├── defaults/             # core default model and config file
+├── cloudwatch/           # default/config for cloudwatch support
+├── sipe/                 # default/config for SIPE logs
+├── ...                   # add new models/config in new directories
+├── _setup_base.py
+└── _setup_otel.py
+```
+
+## 📚 Learn more
+
+- 📖 Full documentation: _coming soon (mkdocs)_
+- 🧪 Examples: [examples/](examples/)

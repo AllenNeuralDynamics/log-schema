@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
 ]
 
 dependencies = [
@@ -18,19 +18,29 @@ dependencies = [
     "types-pyyaml>=6.0.12.12",
 ]
 
+[project.optional-dependencies]
+otel = [
+    "opentelemetry-api>=1.41.1",
+    "opentelemetry-distro>=0.62b1",
+    "opentelemetry-exporter-otlp>=1.41.1",
+    "opentelemetry-sdk>=1.41.1",
+]
+cloudwatch = ["watchtower>=3.1.0"]
+
+all = ["log-schema[otel,cloudwatch]"]
+
 [dependency-groups]
 dev = [
-  "interrogate>=1.5.0",
-  "mypy>=1.4.1",
-  "pytest>=7.4.4",
-  "pytest-cov>=4.1.0",
-  "python-dateutil>=2.9.0.post0",
-  "ruff>=0.15.12",
-  "types-python-dateutil>=2.8.19.14",
+    "log-schema[all]",
+    "interrogate>=1.5.0",
+    "mypy>=1.4.1",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "python-dateutil>=2.9.0.post0",
+    "ruff>=0.15.12",
+    "types-python-dateutil>=2.8.19.14",
 ]
-examples = [
-    "watchtower>=3.1.0",
-]
+examples = ["log-schema[all]"]
 
 [build-system]
 requires = ["uv-build>=0.1.0,<1.0.0"]
