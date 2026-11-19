@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal, Optional
 
 
 class ConfigBuilder:
@@ -27,7 +27,15 @@ class ConfigBuilder:
                 propagate: True
         """
 
-    def get_config_dict(self, has_default_format: bool, has_static_fields: bool):
+    def get_config_dict(
+        self,
+        formatter: Optional[Literal["default", "console"]],
+        has_static_fields: bool,
+    ):
+        """
+        formatter: None for a plain logging formatter, "default" for DefaultFormatter (JSON),
+            "console" for ConsoleFormatter (text).
+        """
         config: dict[str, Any] = {
             "version": 1,
             "disable_existing_loggers": False,
@@ -50,8 +58,10 @@ class ConfigBuilder:
                 },
             },
         }
-        if has_default_format:
+        if formatter == "default":
             config["formatters"]["default"]["()"] = "log_schema.DefaultFormatter"
+        elif formatter == "console":
+            config["formatters"]["default"]["()"] = "log_schema.ConsoleFormatter"
         if has_static_fields:
             config["formatters"]["default"]["static_fields"] = {
                 "app_name": "my_app",

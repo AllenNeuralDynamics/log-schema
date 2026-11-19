@@ -22,7 +22,7 @@ def test_setup_logging_config_model_and_extra_fields_precedence(capsys):
     """
 
     # Create config and model with overlapping fields
-    config = ConfigBuilder().get_config_dict(True, False)
+    config = ConfigBuilder().get_config_dict("default", False)
     config["formatters"]["default"]["static_fields"] = {
         "field1": "from-config",
         "field2": "from-config-will-be-overridden",

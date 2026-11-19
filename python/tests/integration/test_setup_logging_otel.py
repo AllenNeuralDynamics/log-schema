@@ -122,7 +122,7 @@ def test_setup_logging_otel_custom_config_default_formatter_gets_trace_context(c
     Tests: a custom config with the default formatter
     Expect: the log entry to include trace_id - injected to formatter.
     """
-    config = ConfigBuilder().get_config_dict(False, False)
+    config = ConfigBuilder().get_config_dict(None, False)
     config["formatters"]["default"]["()"] = factory
 
     setup_logging_otel(config=config)
@@ -139,7 +139,7 @@ def test_setup_logging_otel_custom_config_non_default_formatter_unchanged(capsys
     Tests: a custom config with a non-default formatter
     Expect: the log entry to remain unchanged and not include trace_id.
     """
-    setup_logging_otel(config=ConfigBuilder().get_config_dict(False, False))
+    setup_logging_otel(config=ConfigBuilder().get_config_dict(None, False))
     tracer = trace.get_tracer(__name__)
 
     with tracer.start_as_current_span("work"):
@@ -153,11 +153,11 @@ def test_setup_logging_otel_does_not_mutate_caller_config():
     Tests: that the caller's config is not mutated by setup_logging_otel.
     Expect: the config remains unchanged after calling setup_logging_otel.
     """
-    config = ConfigBuilder().get_config_dict(True, False)
+    config = ConfigBuilder().get_config_dict("default", False)
 
     setup_logging_otel(config=config, include_trace_context=False)
 
-    assert config == ConfigBuilder().get_config_dict(True, False)
+    assert config == ConfigBuilder().get_config_dict("default", False)
 
 
 def test_setup_logging_otel_model_and_resource_fields_in_logs(capsys):

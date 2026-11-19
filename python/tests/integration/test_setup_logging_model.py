@@ -112,7 +112,7 @@ def test_setup_logging_adds_model_fields_to_json_output(capsys, factory):
     Expect: Model fields are added to the JSON output correctly.
         Only if formatter supports it (i.e. subclass from DefaultFormatter or compatible).
     """
-    config = ConfigBuilder().get_config_dict(False, False)
+    config = ConfigBuilder().get_config_dict(None, False)
     config["formatters"]["default"]["()"] = factory
 
     setup_logging(config=config, model={"app_name": "my_app"})
