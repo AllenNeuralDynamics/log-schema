@@ -30,7 +30,7 @@ def test_setup_logging_defaults(capsys):
     [
         pytest.param(
             None,
-            ConfigBuilder().get_config_dict(True, True),
+            ConfigBuilder().get_config_dict("default", True),
             "app_name",
             id="config dict",
         ),
@@ -42,7 +42,7 @@ def test_setup_logging_defaults(capsys):
         ),
         pytest.param(
             ConfigBuilder().get_config_file_content(),
-            ConfigBuilder().get_config_dict(True, True),
+            ConfigBuilder().get_config_dict("default", True),
             "i-am-from-yaml",
             id="config dict + yaml",
         ),
@@ -75,7 +75,7 @@ def test_setup_logging_custom_config_no_default_formatter(capsys):
     Tests setup logging with a custom config that has no default formatter.
     Expect: Log message plain formatting
     """
-    setup_logging(config=ConfigBuilder().get_config_dict(False, False))
+    setup_logging(config=ConfigBuilder().get_config_dict(None, False))
     logging.info("Test log message")
 
     output = capsys.readouterr().out.strip()
@@ -89,7 +89,7 @@ def test_setup_logging_custom_config_with_default_formatter_with_static_fields(c
     Tests setup logging with a custom config that has a default formatter and static fields.
     Expect: Log message is formatted with default formatter and includes static fields.
     """
-    setup_logging(config=ConfigBuilder().get_config_dict(True, True))
+    setup_logging(config=ConfigBuilder().get_config_dict("default", True))
     logging.info("Test log message")
 
     log_entry = extract_log_entry(capsys)
@@ -101,6 +101,20 @@ def test_setup_logging_custom_config_with_default_formatter_with_static_fields(c
     # Static fields from config
     assert log_entry["app_name"] == "my_app"
     assert log_entry["env"] == "production"
+
+
+def test_setup_logging_custom_config_with_console_formatter_template(capsys):
+    """
+    Tests setup logging with a custom config that uses the console formatter and a template.
+    Expect: The template reaches the formatter, model fields are injected, and output is not JSON.
+    """
+    config = ConfigBuilder().get_config_dict("console", False)
+    config["formatters"]["default"]["template"] = "%(level)s | %(app_name)s | %(message)s"
+
+    setup_logging(config=config, model={"app_name": "my_app"})
+    logging.info("Test log message")
+
+    assert capsys.readouterr().out.strip() == "INFO | my_app | Test log message"
 
 
 def test_invalid_config_path_uses_default(capsys):
@@ -150,8 +164,8 @@ def test_setup_logging_does_not_mutate_caller_config():
     Tests that setup_logging does not mutate the caller's config dictionary.
     Expect: The original config remains unchanged after setup_logging is called.
     """
-    config = ConfigBuilder().get_config_dict(True, False)
+    config = ConfigBuilder().get_config_dict("default", False)
 
     setup_logging(config=config, model={"app_name": "my_app"})
 
-    assert config == ConfigBuilder().get_config_dict(True, False)
+    assert config == ConfigBuilder().get_config_dict("default", False)
