@@ -4,7 +4,6 @@ import importlib
 import importlib.resources as resources
 import logging
 import logging.config
-import warnings
 from datetime import datetime, timezone
 from logging import LogRecord
 from typing import Any
