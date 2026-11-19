@@ -137,6 +137,32 @@ class DefaultFormatter(log_json.JsonFormatter):
         return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
+class _Missing(dict):
+    def __missing__(self, key):
+        return ""
+
+
+class ConsoleFormatter(DefaultFormatter):
+    DEFAULT_TEMPLATE = "%(timestamp)s | %(level)-8s | %(message)s"
+
+    def __init__(self, template=None, **kwargs):
+        logging.PercentStyle(template).validate()
+        self.template = template or self.DEFAULT_TEMPLATE
+        super().__init__(**kwargs)
+
+    def serialize_log_record(self, log_data):
+        values = _Missing(log_data)
+
+        # Grab old renamed fields and set them as keys
+        # In-case user formatted using old field names
+        for old, new in self.rename_fields.items():
+            if new in log_data:
+                values.setdefault(old, log_data[new])
+        exc = log_data.get("exc_info")
+        text = self.template % values
+        return f"{text}\n{exc}" if exc else text
+
+
 ################################################################################
 #
 #   Main Helper Function
